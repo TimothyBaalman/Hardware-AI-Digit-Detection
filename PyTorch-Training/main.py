@@ -4,9 +4,12 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 
+import numpy as np
+
 from itertools import product
 
 from Network import Network
+from json_writer import write_best_results, add_to_history_best
 
 # DataSets
 train_set = torchvision.datasets.MNIST(
@@ -38,6 +41,7 @@ params = dict(
 params_values = [value for value in params.values()]
 
 best_results = {
+	"epoch": 0,
 	"learning_rate": 0,
 	"batch_size": 0, 
 	"to_shuffle": False,
@@ -59,7 +63,8 @@ for learning_rate, batch_size, to_shuffle in product(*params_values):
 	test_loader = torch.utils.data.DataLoader(dataset=test_set, batch_size=batch_size, shuffle=to_shuffle) 
 	# Initilize Model
 	model = Network().to(device=device_to_use)
-
+	# print(list(model.named_parameters())[0][1]["Parameter containing"])
+	
 	# print(list(model.parameters()))
 	print("---------------------------------------------------------------")
 	# print(list(model.named_parameters()))
@@ -95,27 +100,52 @@ for learning_rate, batch_size, to_shuffle in product(*params_values):
 			train_loss += loss.item() * images.size(0) 
 			total_correct += output.argmax(dim=1).eq(target_labels).sum().item()
 		
-		print("\n-----------------------------------------------------------------------------------------------------------------------------")
-		
+				
 		training_loss = train_loss/len(train_loader.dataset)
 		accuracy = total_correct/len(train_loader.dataset)
 
 		print(f"Epoch: {epoch}, Training_Loss: {training_loss}, Accuracy: {accuracy}\n")
 		if(training_loss <= best_results["loss"] and accuracy > best_results["accuracy"]):
-			#TODO overwrite the previous best results json data. 
-			print("Fully Connected Layer Weights:")
-			print(list(model.named_parameters())[0])
+			print("These were better results\n")
+			best_results["epoch"] = epoch
+			best_results["accuracy"] = accuracy
+			best_results["batch_size"] = batch_size
+			best_results["learning_rate"] = learning_rate
+			best_results["loss"] = training_loss
+			best_results["to_shuffle"] = to_shuffle
+			for name, param in model.named_parameters():
+				if name in ["fully_connected.weight"]:
+					best_results["fc_weights"] = param.data.cpu().numpy()
+				elif name in ["fully_connected.bias"]:
+					best_results["fc_bias"] = param.data.cpu().numpy()
+				elif name in ["out.weight"]:
+					best_results["out_weights"] = param.data.cpu().numpy()
+				elif name in ["out.bias"]:
+					best_results["out_bias"] = param.data.cpu().numpy()
+					
+			# best_results["fc_weights"] = list(model.named_parameters())[0][1]["Parameter containing"]
+			# best_results["fc_bias"] = list(model.named_parameters())[1][1]["Parameter containing"]
+			# best_results["out_weights"] = list(model.named_parameters())[2][1]["Parameter containing"]
+			# best_results["out_bias"] = list(model.named_parameters())[3][1]["Parameter containing"]
+			print(best_results)
+			# print("Fully Connected Layer Weights:")
+			# print(list(model.named_parameters())[0])
 
-			print("\nFully Connected Layer Bias:")
-			print(list(model.named_parameters())[1])
+			# print("\nFully Connected Layer Bias:")
+			# print(list(model.named_parameters())[1])
 
-			print("\nOutput Layer Weights:")
-			print(list(model.named_parameters())[2])
+			# print("\nOutput Layer Weights:")
+			# print(list(model.named_parameters())[2])
 
-			print("\nOutput Layer Bias:")
-			print(list(model.named_parameters())[3])
-		
+			# print("\nOutput Layer Bias:")
+			# print(list(model.named_parameters())[3])
+
+		print("\n-----------------------------------------------------------------------------------------------------------------------------")
 		# print(model.fully_connected.weight)
 		
 		# print(model.out.weight)
 
+print(best_results)
+write_best_results(best_results)
+add_to_history_best(best_results)
+print("done")
