@@ -1,4 +1,5 @@
 import torch
+from torch._C import is_anomaly_enabled
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
@@ -21,17 +22,24 @@ test_set = torchvision.datasets.MNIST(
 	transform=transforms.ToTensor()
 )
 num_workers = 0
-batch_size = 64 # between 8 and 64
+batch_size = 640 # between 8 and 64
 to_shuffle = True
 
 # Prepare Datasets
 train_loader = torch.utils.data.DataLoader(dataset=train_set, batch_size=batch_size, shuffle=to_shuffle, num_workers=num_workers)
 test_loader = torch.utils.data.DataLoader(dataset=test_set, batch_size=batch_size, shuffle=to_shuffle, num_workers=num_workers)
 
-# Initilize Model
-model = Network()
+device_to_use = torch.device("cpu")
+# Determine if we can use a GPU
+if(torch.cuda.is_available()):
+	device_to_use = torch.device("cuda:0")
+	print("Running on the GPU")
 
-print(list(model.parameters()))
+# Initilize Model
+model = Network().to(device=device_to_use)
+
+# print(list(model.parameters()))
+print("---------------------------------------------------------------")
 print(list(model.named_parameters()))
 
 # Loss function
@@ -40,13 +48,17 @@ criterion = nn.CrossEntropyLoss()
 # optimizer = optim.SGD(model.parameters(), lr=0.01)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-num_epochs = 5 
+num_epochs = 1
 
 for epoch in range(num_epochs):
 	train_loss = 0.0
 	total_correct = 0.0
 
 	for images, target_labels in train_loader:
+
+		images = images.to(device=device_to_use)
+		target_labels = target_labels.to(device=device_to_use)
+
 		optimizer.zero_grad()
 
 		# Forward Pass
@@ -68,8 +80,18 @@ for epoch in range(num_epochs):
 	print("\n-----------------------------------------------------------------------------------------------------------------------------")
 	print(f"Epoch: {epoch}, Training_Loss: {train_loss/len(train_loader.dataset)}, Accuracy: {total_correct/len(train_loader.dataset)}\n")
 	print("Fully Connected Layer Weights:")
-	print(model.fully_connected.weight)
-	
+	print(list(model.named_parameters())[0])
+
+	print("\nFully Connected Layer Bias:")
+	print(list(model.named_parameters())[1])
+
 	print("\nOutput Layer Weights:")
-	print(model.out.weight)
-print(model.parameters())
+	print(list(model.named_parameters())[2])
+
+	print("\nOutput Layer Bias:")
+	print(list(model.named_parameters())[3])
+	
+	# print(model.fully_connected.weight)
+	
+	# print(model.out.weight)
+
