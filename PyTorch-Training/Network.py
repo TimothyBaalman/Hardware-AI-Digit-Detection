@@ -11,7 +11,13 @@ class Network(nn.Module):
 		# self.fully_connected_2 = nn.Linear(in_features=1500, out_features=200)
 
 		# self.out = nn.Linear(in_features=200, out_features=10)
+
+		# Since the images are 28 * 28 is size we have an in for each channel
+		# I choose there to be 64 outputs which will be the amount of nodes we have
+		# So there are 784 inputs connected to 64 nodes each with a different weight
 		self.fully_connected= nn.Linear(in_features=28*28, out_features=64)
+		# from the 64 nodes I connect them to the 10 available options the one with the 
+		# highest value is the predicted number.
 		self.out = nn.Linear(in_features=64, out_features=10)
 
 	def forward(self, tensor):
