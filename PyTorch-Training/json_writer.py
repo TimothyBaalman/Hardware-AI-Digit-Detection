@@ -2,7 +2,7 @@ import json
 import os
 import numpy as np
 
-path_to_dir = os.getcwd() + "/PyTorch-Training"
+path_to_dir = os.getcwd()
 
 class NumpyEncoder(json.JSONEncoder):
 	""" Special json encoder for numpy types """
@@ -22,11 +22,10 @@ class NumpyEncoder(json.JSONEncoder):
 
 def write_best_results(json_data):
 	try:
-		with open(f"{path_to_dir}/best_results.json", "r+") as file:
-			file.seek(0)
+		with open(f"{path_to_dir}/best_results.json", "w") as file:
 			json.dump(json_data, file, indent=3, cls=NumpyEncoder)
-	except:
-		print("Couldn't Write to file")
+	except Exception as e:
+		print(f"Couldn't Write to file {e}")
 
 def add_to_history_best(json_data):
 	try:
@@ -38,5 +37,5 @@ def add_to_history_best(json_data):
 				file_data["results"] = [json_data]
 			file.seek(0)
 			json.dump(file_data, file, indent=3, cls=NumpyEncoder)
-	except:
-		print("couldn't write to file")
+	except Exception as e:
+		print(f"Couldn't Write to file {e}")

@@ -34,8 +34,8 @@ if(torch.cuda.is_available()):
 
 # Setup Varying Parameters to use
 params = dict(
-	learning_rate = [.01, .001, .005],
-	batch_size = [64, 450, 1000],
+	learning_rate = [.01, .008, .013],
+	batch_size = [500, 650, 850],
 	to_shuffle = [True, False]
 )
 params_values = [value for value in params.values()]
@@ -66,7 +66,7 @@ for learning_rate, batch_size, to_shuffle in product(*params_values):
 	# print(list(model.named_parameters())[0][1]["Parameter containing"])
 	
 	# print(list(model.parameters()))
-	print("---------------------------------------------------------------")
+	# print("---------------------------------------------------------------")
 	# print(list(model.named_parameters()))
 
 	# Loss function
@@ -75,7 +75,7 @@ for learning_rate, batch_size, to_shuffle in product(*params_values):
 	# optimizer = optim.SGD(model.parameters(), lr=0.01)
 	optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-	num_epochs = 1
+	num_epochs = 10
 
 	for epoch in range(num_epochs):
 		train_loss = 0.0
