@@ -1,10 +1,13 @@
 def fractional_converter(fractional, num_fractional_bits=48):
 	binary_rep = []
 	while(fractional > 0):
+		if(len(binary_rep) >= num_fractional_bits):
+			print("\nFractional Overflow\n")
+			break
 		fractional *= 2
 		if(fractional >= 1):
 			binary_rep.append(1)
-			fractional -= 1
+			fractional %= 1
 		else:
 			binary_rep.append(0)
 
@@ -19,6 +22,9 @@ def fractional_converter(fractional, num_fractional_bits=48):
 def integer_converter(whole_num, num_integer_bits=15):
 	binary_rep = []
 	while(whole_num > 0):
+		if(len(binary_rep) >= num_integer_bits):
+			print("\nInt overflow\n")
+			break
 		if(whole_num % 2 == 0):
 			binary_rep.append(0)			
 		else:
@@ -48,11 +54,14 @@ def fixed_point_converter(num, num_int_bits, num_frac_bits):
 	sign_bit = check_sign(num)
 
 	str_num = str(num)
-
-	integer, fractional = str_num.split(".")
+	try:
+		integer, fractional = str_num.split(".")
+	except ValueError:
+		integer = num
+		fractional = "0"
 	integer_bits = integer_converter(abs(int(integer)), num_int_bits)
 
 	fractional_bits = fractional_converter(float("0."+fractional),num_frac_bits)
-
+	
 	# print(sign_bit + integer_bits + fractional_bits)
 	return sign_bit + integer_bits + fractional_bits
