@@ -35,8 +35,9 @@ if(torch.cuda.is_available()):
 # Setup Varying Parameters to use
 params = dict(
 	learning_rate = [.01, .008, .013],
-	batch_size = [500, 650, 850],
-	to_shuffle = [True, False]
+	batch_size = [650, 850, 1000],
+	to_shuffle = [True, False],
+	epochs = [10, 25, 50]
 )
 params_values = [value for value in params.values()]
 
@@ -54,9 +55,9 @@ best_results = {
 }
 
 # Loop through the varied values. 
-for learning_rate, batch_size, to_shuffle in product(*params_values):
+for learning_rate, batch_size, to_shuffle, epochs in product(*params_values):
 	print("\n--------------------------------------------------------------------------------")
-	print(f"testing with lr={learning_rate}, batch_size={batch_size}, and shuffle={to_shuffle}")
+	print(f"testing with lr={learning_rate}, batch_size={batch_size}, shuffle={to_shuffle}, and epochs={epochs}")
 
 	# Prepare Datasets
 	train_loader = torch.utils.data.DataLoader(dataset=train_set, batch_size=batch_size, shuffle=to_shuffle)
@@ -75,9 +76,7 @@ for learning_rate, batch_size, to_shuffle in product(*params_values):
 	# optimizer = optim.SGD(model.parameters(), lr=0.01)
 	optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-	num_epochs = 10
-
-	for epoch in range(num_epochs):
+	for epoch in range(epochs):
 		train_loss = 0.0
 		total_correct = 0.0
 
@@ -114,6 +113,7 @@ for learning_rate, batch_size, to_shuffle in product(*params_values):
 			best_results["loss"] = training_loss
 			best_results["to_shuffle"] = to_shuffle
 			for name, param in model.named_parameters():
+				print(name)
 				if name in ["fully_connected.weight"]:
 					best_results["fc_weights"] = param.data.cpu().numpy()
 				elif name in ["fully_connected.bias"]:
