@@ -34,10 +34,10 @@ if(torch.cuda.is_available()):
 
 # Setup Varying Parameters to use
 params = dict(
-	learning_rate = [.01, .008, .013],
-	batch_size = [650, 850, 1000],
+	learning_rate = [.009, .01, .0108],
+	batch_size = [750, 850, 950],
 	to_shuffle = [True, False],
-	epochs = [10, 25, 50]
+	epochs = [30, 40]
 )
 params_values = [value for value in params.values()]
 
@@ -114,8 +114,9 @@ for learning_rate, batch_size, to_shuffle, epochs in product(*params_values):
 			best_results["to_shuffle"] = to_shuffle
 			for name, param in model.named_parameters():
 				print(name)
+				# without encoder would need to do np.array(parm.data.cpu(), dtype="float32").tolist()
 				if name in ["fully_connected.weight"]:
-					best_results["fc_weights"] = param.data.cpu().numpy()
+					best_results["fc_weights"] = param.data.cpu().numpy() 
 				elif name in ["fully_connected.bias"]:
 					best_results["fc_bias"] = param.data.cpu().numpy()
 				elif name in ["out.weight"]:
