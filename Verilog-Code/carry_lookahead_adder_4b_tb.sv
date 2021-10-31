@@ -1,3 +1,4 @@
+`timescale 1ps/1ps
 module cla_4b_tb;
 	reg [3:0] a_in, b_in;
 	reg carry_in;
