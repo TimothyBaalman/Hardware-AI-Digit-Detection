@@ -13,7 +13,7 @@ module multiplier_2c_4b(
 	// setup init b values
 	and(b[0], y[0], x[1]);
 	and(b[1], y[0], x[2]);
-	and(b[2], y[0], x[3]);
+	nand(b[2], y[0], x[3]);
 	assign b[3] = 1'b1;
 
 	// setup all a values
@@ -39,7 +39,7 @@ module multiplier_2c_4b(
 		.s(result[1]), .c_out(ci_out[0])
 	);
 	full_adder_1b fa02(
-		.a([1]), .b(b[1]), .c_in(ci_out[0]),
+		.a(a[1]), .b(b[1]), .c_in(ci_out[0]),
 		.s(b[4]), .c_out(ci_out[1])
 	);
 	full_adder_1b fa03(
