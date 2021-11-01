@@ -15,5 +15,5 @@ print(best_results)
 best_results["accuracy"] = 50
 weights = [[50, 978, 2323, 23545], [32,32, 3563, 6734]]
 best_results["fc_weights"] = weights
-
+best_results["fc_weights"].append([0])
 print(best_results)

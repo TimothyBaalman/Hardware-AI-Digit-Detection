@@ -34,10 +34,10 @@ if(torch.cuda.is_available()):
 
 # Setup Varying Parameters to use
 params = dict(
-	learning_rate = [.009, .01, .0108],
-	batch_size = [750, 850, 950],
-	to_shuffle = [True, False],
-	epochs = [30, 40]
+	learning_rate = [.009, .01],
+	batch_size = [1250],
+	to_shuffle = [True],
+	epochs = [50]
 )
 params_values = [value for value in params.values()]
 
@@ -104,7 +104,7 @@ for learning_rate, batch_size, to_shuffle, epochs in product(*params_values):
 		accuracy = total_correct/len(train_loader.dataset)
 
 		print(f"Epoch: {epoch}, Training_Loss: {training_loss}, Accuracy: {accuracy}\n")
-		if(training_loss <= best_results["loss"] and accuracy > best_results["accuracy"]):
+		if(training_loss <= best_results["loss"] and accuracy >= best_results["accuracy"]):
 			print("These were better results\n")
 			best_results["epoch"] = epoch
 			best_results["accuracy"] = accuracy
