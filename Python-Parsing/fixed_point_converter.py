@@ -80,6 +80,8 @@ def float_to_signed_fixed_point(num_bits, num, m, n):
 	bin_str = str(num_bits) + "'b"
 
 	for index, bit in enumerate(output):
+		if(index == 1):
+			bin_str += "_"
 		if(index == m + 1): # +1 for signed bit
 			bin_str += "_"
 		bin_str += str(bit)
