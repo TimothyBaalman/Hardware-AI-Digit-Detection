@@ -26,7 +26,7 @@ converted_json_oputput = {
 	"fc_bias": [],
 	"out_weights": [],
 	"out_bias": []
-}\
+}
 
 output_json_file = open(root + "/convert_best_results.json", "w")
 try:
