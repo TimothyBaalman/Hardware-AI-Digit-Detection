@@ -12,8 +12,10 @@
 	
 # fa_32b = N_Bit_FA(32)
 # print(fa_32b.output)
-def fa_operations(n):
+def fa_operations(n, sub_module=0):
+	
 	output = []
+
 	output.append(f"	wire [{n-2}:0] ci_out;\n")
 
 	return output
