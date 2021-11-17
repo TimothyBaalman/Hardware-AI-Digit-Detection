@@ -158,6 +158,7 @@ class Module_Builder():
 		self.used_count += 1
 		return output
 
+# Example of use cases
 fa_1b = Module_Builder("fa", 1, [("a", 1), ("b", 1), ("c_in", 1)], [("s", 1), ("c_out", 1)])
 file_output = open("test.sv", "w")
 fa_1b.output_base(file_output)

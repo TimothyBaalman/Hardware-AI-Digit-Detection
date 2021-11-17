@@ -16,6 +16,7 @@ def fa_operations(n, inputs, outputs):
 	output = []
 	if(n > 1):
 		output.append(f"	wire [{n-2}:0] ci_out;\n")
+		
 	elif(n == 1): # fa_1b operations
 		a, b, c_in = inputs
 		s, c_out = outputs
