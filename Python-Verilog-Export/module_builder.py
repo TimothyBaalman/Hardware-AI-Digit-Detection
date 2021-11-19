@@ -38,6 +38,7 @@ class Module_Builder():
 		}
 		# Setup matching bits for inputs
 		for inputs in self.input_vals:
+			print(f"Inputs {self.module_name}: {matching_bits}")
 			name, bits = inputs
 			len_stored = len(matching_bits["inputs"])
 			if(not matching_bits["inputs"]):
@@ -55,6 +56,7 @@ class Module_Builder():
 						break
 		# Setup matching bits for outputs
 		for outputs in self.output_vals:
+			print(f"Outputs {self.module_name}: {matching_bits}")
 			name, bits = outputs
 			len_stored = len(matching_bits["outputs"])
 			if(not matching_bits["outputs"]):
@@ -76,43 +78,31 @@ class Module_Builder():
 			if(bit == 1):
 				str_out = f"   input"
 			else:
-				str_out = f"   [{bit-1}:0] input"
+				str_out = f"	input [{bit-1}:0]"
 			for in_names in matching_bits["inputs"][bit]:
 				print(in_names)
 				str_out += f" {in_names},"
 			str_out += "\n"
 
 			self.base.append(str_out)
-
-		for bit in matching_bits["outputs"]:
+		
+		output_count = len(matching_bits["outputs"])
+		for out_index, bit in enumerate(matching_bits["outputs"]):
 			str_out = ""
 			if(bit == 1):
 				str_out = f"   output"
 			else:
-				str_out = f"   [{bit-1}:0] output"
+				str_out = f"	output [{bit-1}:0]"
 			for out_names in matching_bits["outputs"][bit]:
-				print(out_names)
-				if(out_names == matching_bits["outputs"][bit][-1]):
+				# on last bit on output and it's the last index of the outputs don't add comma
+				if(out_names == matching_bits["outputs"][bit][-1] and out_index == output_count - 1): #  or output_count == 1
 					str_out += f" {out_names}"
 				else:
 					str_out += f" {out_names},"
 			str_out += "\n"
-
+			
 			self.base.append(str_out)
-
-		# for outputs in self.output_vals:
-		#    name, bits = outputs
-		#    if(outputs == self.output_vals[-1]):
-		#       if(bits == 1):
-		#          self.base.append(f"  output {name}\n")
-		#       else:
-		#          self.base.append(f"  output [{bits-1}:0] {name}\n")
-		#    else: 
-		#       if(bits == 1):
-		#          self.base.append(f"  output {name},\n")
-		#       else:
-		#          self.base.append(f"  output [{bits-1}:0] {name},\n")
-
+		
 		self.base.append(f");\n")
 
 	def build_fa_nb(self):
@@ -121,7 +111,7 @@ class Module_Builder():
 
 		for operation in data_operations:
 			self.base += operation
-		self.base.append(f"endmodule // for module {self.module_name}")
+		self.base.append(f"endmodule // for module {self.module_name}\n\n")
 		
 	def output_base(self, file_ptr):
 		for string in self.base:
@@ -161,6 +151,8 @@ class Module_Builder():
 # Example of use cases
 fa_1b = Module_Builder("fa", 1, [("a", 1), ("b", 1), ("c_in", 1)], [("s", 1), ("c_out", 1)])
 file_output = open("test.sv", "w")
+fa_32b = Module_Builder("fa", 4, [("a", 4), ("b", 4), ("c_in", 1)], [("s", 4), ("c_out", 1)])
 fa_1b.output_base(file_output)
+fa_32b.output_base(file_output)
 
-print(fa_1b.use_module([("a","bit0"), ("b", "bit1"), ("c_in", "bit2")], [("s", "bit_O_0"), ("c_out", "bit_O_1")]))
+# print(fa_1b.use_module([("a","bit0"), ("b", "bit1"), ("c_in", "bit2")], [("s", "bit_O_0"), ("c_out", "bit_O_1")]))
