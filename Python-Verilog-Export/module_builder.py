@@ -1,32 +1,46 @@
 import json
 from full_adder_n_bit import fa_operations
+from half_adder import ha_operations
+from twos_compliment_multiplier import mult_2c_operations
 
 class Module_Builder():
-	def __init__(self, module_type, n_bits = 1, input_vals = [], output_vals = []):
+	def __init__(self, module_type, n_bits = 1, input_vals = [], output_vals = [], needed_submodules = []):
+		self.module_type = module_type
 		self.module_name = module_type + f"_{n_bits}b"
+		print(self.module_name)
 		self.n = n_bits
 
 		self.input_vals = input_vals
 		self.input_names = []
-		for tup in input_vals:
-			self.input_names.append(tup[0])
+		for input_name, _ in input_vals:
+			self.input_names.append(input_name)
 
 		self.output_vals = output_vals
 		self.output_names = []
-		for tup in output_vals:
-			self.output_names.append(tup[0])
+		for output_name, _ in output_vals:
+			self.output_names.append(output_name)
 
-		self.used_count = 0
+		self.needed_submodules = needed_submodules
+
+		self.used_count = 0 # For keeping track of when used during Network wiring
 
 		# self.needed_sub_modules = needed_modules #array of used module classes
 		
 		self.build_base()
+		module_operations = []
 		if(module_type == "fa"):
-			self.build_fa_nb()
-		elif(module_type == "mult2c"):
-			'''self.build_2c_multiplier_nb()'''
+			module_operations = fa_operations(self.n, self.input_names, self.output_names, self.needed_submodules)
+		elif(module_type == "ha"):
+			module_operations = ha_operations(self.input_names, self.output_names)
+		elif(module_type == "m_2c"):
+			module_operations = mult_2c_operations(self.n, self.input_names, self.output_names, self.needed_submodules)
 		else:
 			print(f"No module creation implemented for {module_type}")
+
+		for operation in module_operations:
+			self.base += operation
+
+		self.base.append(f"endmodule // for module {self.module_name}\n\n")
   
 	def build_base(self):
 		self.base = []
@@ -105,14 +119,6 @@ class Module_Builder():
 		
 		self.base.append(f");\n")
 
-	def build_fa_nb(self):
-		'''Finish FA Build '''
-		data_operations = fa_operations(self.n, self.input_names, self.output_names)
-
-		for operation in data_operations:
-			self.base += operation
-		self.base.append(f"endmodule // for module {self.module_name}\n\n")
-		
 	def output_base(self, file_ptr):
 		for string in self.base:
 			file_ptr.write(string)
@@ -149,10 +155,24 @@ class Module_Builder():
 		return output
 
 # Example of use cases
+ha = Module_Builder("ha", 1, [("a", 1), ("b", 1)], [("s", 1), ("c_out", 1)])
 fa_1b = Module_Builder("fa", 1, [("a", 1), ("b", 1), ("c_in", 1)], [("s", 1), ("c_out", 1)])
+
+# fa_32b = Module_Builder(
+# 		"fa", 32, 
+# 		[("a", 32), ("b", 32), ("c_in", 1)],
+# 		[("s", 32), ("c_out", 1)],
+# 		[fa_1b]
+# 	)
+
+mult_2c_4b = Module_Builder("m_2c", 4, [("x", 4), ("y", 4)], [("m_out", 4)], [ha, fa_1b])
+
+# cla_1b = Module_Builder("cla", 4, [("a", 4), ("b", 4), ("c_in", 1)], [])
+
 file_output = open("test.sv", "w")
-fa_32b = Module_Builder("fa", 4, [("a", 4), ("b", 4), ("c_in", 1)], [("s", 4), ("c_out", 1)])
+ha.output_base(file_output)
 fa_1b.output_base(file_output)
-fa_32b.output_base(file_output)
+# fa_32b.output_base(file_output)
+mult_2c_4b.output_base(file_output)
 
 # print(fa_1b.use_module([("a","bit0"), ("b", "bit1"), ("c_in", "bit2")], [("s", "bit_O_0"), ("c_out", "bit_O_1")]))
