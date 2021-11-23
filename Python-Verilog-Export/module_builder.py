@@ -158,21 +158,21 @@ class Module_Builder():
 ha = Module_Builder("ha", 1, [("a", 1), ("b", 1)], [("s", 1), ("c_out", 1)])
 fa_1b = Module_Builder("fa", 1, [("a", 1), ("b", 1), ("c_in", 1)], [("s", 1), ("c_out", 1)])
 
-# fa_32b = Module_Builder(
-# 		"fa", 32, 
-# 		[("a", 32), ("b", 32), ("c_in", 1)],
-# 		[("s", 32), ("c_out", 1)],
-# 		[fa_1b]
-# 	)
+fa_32b = Module_Builder(
+		"fa", 32, 
+		[("a", 32), ("b", 32), ("c_in", 1)],
+		[("s", 32), ("c_out", 1)],
+		[fa_1b]
+	)
 
-mult_2c_4b = Module_Builder("m_2c", 4, [("x", 4), ("y", 4)], [("m_out", 4)], [ha, fa_1b])
+mult_32c_4b = Module_Builder("m_2c", 32, [("x", 32), ("y", 32)], [("m_out", 32)], [ha, fa_1b])
 
 # cla_1b = Module_Builder("cla", 4, [("a", 4), ("b", 4), ("c_in", 1)], [])
 
 file_output = open("test.sv", "w")
 ha.output_base(file_output)
 fa_1b.output_base(file_output)
-# fa_32b.output_base(file_output)
-mult_2c_4b.output_base(file_output)
+fa_32b.output_base(file_output)
+mult_32c_4b.output_base(file_output)
 
 # print(fa_1b.use_module([("a","bit0"), ("b", "bit1"), ("c_in", "bit2")], [("s", "bit_O_0"), ("c_out", "bit_O_1")]))
