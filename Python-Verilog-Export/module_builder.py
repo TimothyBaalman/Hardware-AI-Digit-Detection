@@ -1,9 +1,10 @@
 import json
+import math
 from full_adder_n_bit import fa_operations
 from half_adder import ha_operations
 from twos_compliment_multiplier import mult_2c_operations
 
-class Module_Builder():
+class BasicModuleBuilder():
 	def __init__(self, module_type, n_bits = 1, input_vals = [], output_vals = [], needed_submodules = []):
 		self.module_type = module_type
 		self.module_name = module_type + f"_{n_bits}b"
@@ -154,20 +155,68 @@ class Module_Builder():
 		self.used_count += 1
 		return output
 
-# Example of use cases
-ha = Module_Builder("ha", 1, [("a", 1), ("b", 1)], [("s", 1), ("c_out", 1)])
-fa_1b = Module_Builder("fa", 1, [("a", 1), ("b", 1), ("c_in", 1)], [("s", 1), ("c_out", 1)])
+class WeightRomModuleBuilder():
+	def __init__(self, layer_name, data_size, mem_amount, file_index, dat_file_path):
+		self.layer_name = layer_name
+		self.data_size = data_size
+		self.mem_amount = mem_amount
+		self.file_path = dat_file_path
+		self.index_size = round(math.log2(mem_amount)) - 1
 
-fa_32b = Module_Builder(
+		self.base = [f"module wieght_{file_index}_{layer_name}_rom (\n"]
+		self.base.append(f"\tinput [{self.index_size}:0] index, //max value is {mem_amount}\n")
+		self.base.append(f"\toutput [{data_size-1}:0] // {data_size} bit address\n")
+		self.base.append(f");\n")
+		self.base.append(f"\tlogic [{data_size-1}:0] mem [{mem_amount}]; // {mem_amount} inputs to the node\n")
+		self.base.append(f"\tinitial begin\n")
+		self.base.append(f'\t\t $readmemb("{dat_file_path}", mem);\n')
+		self.base.append(f"\tend\n")
+		self.base.append(f"assign data = mem[index]; \n\n")
+		self.base.append(f"endmodule")
+
+	def output_base(self, file_ptr):
+		for string in self.base:
+			file_ptr.write(string)
+
+class BiasRomModuleBuilder():
+	def __init__(self, layer_name, data_size, mem_amount, dat_file_path):
+		self.layer_name = layer_name
+		self.data_size = data_size
+		self.mem_amount = mem_amount
+		self.file_path = dat_file_path
+		self.index_size = round(math.log2(mem_amount)) - 1
+
+		self.base = [f"module bias_{layer_name}_rom (\n"]
+		self.base.append(f"\tinput [{self.index_size}:0] index, //max value is {mem_amount}\n")
+		self.base.append(f"\toutput [{data_size-1}:0] // {data_size} bit address\n")
+		self.base.append(f");\n")
+		self.base.append(f"\tlogic [{data_size-1}:0] mem [{mem_amount}]; // {mem_amount} inputs to the node\n")
+		self.base.append(f"\tinitial begin\n")
+		self.base.append(f'\t\t $readmemb("{dat_file_path}", mem);\n')
+		self.base.append(f"\tend\n")
+		self.base.append(f"assign data = mem[index]; \n\n")
+		self.base.append(f"endmodule")
+
+	def output_base(self, file_ptr):
+		for string in self.base:
+			file_ptr.write(string)
+
+# Example of use cases
+ha = BasicModuleBuilder("ha", 1, [("a", 1), ("b", 1)], [("s", 1), ("c_out", 1)])
+fa_1b = BasicModuleBuilder("fa", 1, [("a", 1), ("b", 1), ("c_in", 1)], [("s", 1), ("c_out", 1)])
+
+fa_32b = BasicModuleBuilder(
 		"fa", 32, 
 		[("a", 32), ("b", 32), ("c_in", 1)],
 		[("s", 32), ("c_out", 1)],
 		[fa_1b]
 	)
 
-mult_32c_4b = Module_Builder("m_2c", 32, [("x", 32), ("y", 32)], [("m_out", 32)], [ha, fa_1b])
+mult_32c_4b = BasicModuleBuilder("m_2c", 32, [("x", 32), ("y", 32)], [("m_out", 32)], [ha, fa_1b])
 
-# cla_1b = Module_Builder("cla", 4, [("a", 4), ("b", 4), ("c_in", 1)], [])
+# cla_1b = BasicModuleBuilder("cla", 4, [("a", 4), ("b", 4), ("c_in", 1)], [])
+
+
 
 file_output = open("test.sv", "w")
 ha.output_base(file_output)
