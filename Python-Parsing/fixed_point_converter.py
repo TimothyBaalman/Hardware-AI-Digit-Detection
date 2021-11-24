@@ -13,6 +13,7 @@ def binary_conversion(whole_num, num_bits=32):
 		else:
 			binary_rep.append(1)
 		whole_num /= 2
+		#TODO math.round(whole_num)
 		whole_num = int(whole_num)
 	
 	# Fill in extra space will 0's
@@ -77,7 +78,8 @@ def float_to_signed_fixed_point(num_bits, num, m, n):
 	if(num <= 0):
 		output = binary_to_2C(output)
 	
-	bin_str = str(num_bits) + "'b"
+	# bin_str = str(num_bits) + "'b"
+	bin_str = ""
 
 	for index, bit in enumerate(output):
 		if(index == 1):

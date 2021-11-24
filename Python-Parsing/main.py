@@ -48,59 +48,15 @@ try:
 	json.dump(converted_json_oputput,output_json_file,indent=3) 
 except Exception as e:
 		print(e)
+output_json_file.close()
 
-# for weight_file in weight_files:
-# 	open(root + f"/{weight_file}.json", "w")
-# 	# file.close()
-# 	open(root + f"/{weight_file}.dat", "w")
-# 	# file.close()
-# 	try:
-# 		with open(path_to_best, "r") as file:
-# 			json_data = json.load(file)
-# 			amount_of_weight_nodes = len(json_data[weight_file])
-			
-# 			output_json = {}
+#Output weights fc dat files
+for index, vals in enumerate(converted_json_oputput["fc_weights"]):
+	with open(f"{root}/fc_weight_{index}.dat", "w") as fc_file:
+		for val in vals:
+			fc_file.write(f"{val}\n")
 
-# 			for node in range(amount_of_weight_nodes):
-# 				output_data = []
-# 				for weight in json_data[weight_file][node]:
-					
-# 					output = float_to_signed_fixed_point(address_size, weight, integer_part_size, fractional_part_size)
-# 					output_data.append(output)
-# 					with open(root+f"/{weight_file}.dat", "r+") as dat_file:
-# 						dat_file.seek(0, 2) # move to end of file
-# 						dat_file.write(f"{node}:{output}\n")
-# 				output_json.update({f"node_{node}": output_data})
-
-# 			with open(root+f"/{weight_file}.json", "r+") as json_data_file:
-# 				json.dump(output_json, json_data_file, indent=3)
-
-# 	except Exception as e:
-# 		print(e)
-
-# for bias_file in bias_files:
-# 	open(root + f"/{bias_file}.json", "w")
-# 	# file.close()
-# 	open(root + f"/{bias_file}.dat", "w")
-# 	# file.close()
-# 	try:
-# 		with open(path_to_best, "r") as file:
-# 			json_data = json.load(file)
-# 			output_json = {}
-# 			output_data = []
-# 			for index, node_bias in enumerate(json_data[bias_file]):
-				
-# 				output = float_to_signed_fixed_point(address_size, node_bias, integer_part_size, fractional_part_size)
-# 				output_data.append(output)
-
-# 				with open(root+f"/{bias_file}.dat", "r+") as dat_file:
-# 					dat_file.seek(0, 2) # move to end of file
-# 					dat_file.write(f"{index}:{output}\n")
-
-# 				output_json.update({f"node_{index}": output})
-
-# 			with open(root+f"/{bias_file}.json", "r+") as json_data_file:
-# 				json.dump(output_json, json_data_file, indent=3)
-
-# 	except Exception as e:
-# 		print(e)
+# output bias fc dat
+with open(f"{root}/fc_bias.dat", "w") as fc_file:
+	for index, val in enumerate(converted_json_oputput["fc_bias"]):
+		fc_file.write(f"{val}\n")
