@@ -2,3 +2,5 @@ env/
 __pycache__/
 data/
 test.json
+@_opt/
+work/
