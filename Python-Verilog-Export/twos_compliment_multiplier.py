@@ -15,7 +15,7 @@ def mult_2c_operations(n, inputs, outputs, submodules):
 
 	output.append(f"	wire [{2*n-1}:0] {wire_result};\n")
 	output.append(f"	wire [{n*(n-1)}:0] {wire_a}, {wire_b};\n")
-	output.append(f"	wire [{3*(n-1)}:0] {wire_ci_out};\n")
+	output.append(f"	wire [{(n-1)*(n-1)}:0] {wire_ci_out};\n")
 
 	output.append(f"	and({wire_result}[0], {y}[0], {x}[0]);\n")
 
@@ -117,7 +117,7 @@ def mult_2c_operations(n, inputs, outputs, submodules):
 		fractional_part_size = 14 #n
 		output.append(f"\n\tassign {m_out} = {wire_result}[{(2*n-1)-(integer_part_size+1)}:{fractional_part_size}]\n")
 	else: # Basic chop
-		output.append(f"\n\tassign {m_out} = {wire_result}[{n-1}:0]\n")
+		output.append(f"\n\tassign {m_out} = {wire_result}[{n-1}:0];\n")
 
 	return output
 	
