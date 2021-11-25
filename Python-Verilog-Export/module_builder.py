@@ -236,7 +236,7 @@ class BuildNode():
 			self.base.append("\t);\n")
 		self.base.append(f"\t{self.activation_function_module.name} act_func(.r_in(sum_steps[{self.input_amount - 1}]), .r_out(node_res);\n")
 		self.base.append(f"endmodule //{self.name}\n")
-		
+
 	def output_base(self, file_ptr):
 		for string in self.base:
 			file_ptr.write(string)
@@ -249,6 +249,8 @@ class BuildLayer():
 	
 	def build_base(self):
 		self.base.append(f"module {self.name}(\n")
+		#TODO take in an input for first one it is the px_rom data the next ones will be the prev layer's output
+		# which is all created in the network module
 		self.base.append(f"\toutput [{self.data_size - 1}:0] data\n")
 		self.base.append(f");\n")
 
