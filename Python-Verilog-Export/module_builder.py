@@ -197,40 +197,70 @@ class ActivationFuncModuleBuilder():
 		for string in self.base:
 			file_ptr.write(string)
 
-#TODO create NODE_BUILDER class
 class BuildNode():
-	def __init__(self, name, is_input_layer, px_module, weight_module, bias_module, activation_function_module):
+	def __init__(self, name, node_index, adder_module, mult_module, data_size, activation_function_module, input_amount):
 		self.name = name 
-		self.data_size = px_module.data_size
-		self.px_module = px_module
-		self.weight_module = weight_module
-		self.bias_module = bias_module
+		self.node_index = node_index
+		self.adder_module = adder_module
+		self.mult_module = mult_module
+		self.data_size = data_size
 		self.activation_function_module = activation_function_module
-
-		self.output_amount = bias_module.mem_amount
+		self.input_amount = input_amount
 
 		self.base = []
 		self.build_base()
-		if(is_input_layer):
-			self.implement_summation_with_px_mod()
-		else:
-			self.implement_summation()
+		self.implement_summation()
 	
 	def build_base(self):
 		self.base.append(f"module {self.name}(\n")
-		self.base.append(f"\toutput [{self.data_size -1}:0] data [{self.output_amount}]\n")
+		self.base.append(f"\tinput [{self.data_size - 1}:0] inputs [{self.input_amount }]\n")
+		self.base.append(f"\tinput [{self.data_size - 1}:0] weights [{self.input_amount }]\n")
+		self.base.append(f"\tinput [{self.data_size - 1}:0] bias\n")
+		self.base.append(f"\toutput [{self.data_size - 1}:0] node_res\n")
 		self.base.append(f");\n")
-		
-	def implement_summation_with_px_mod(self):
-		self.base.append(f"\n")
 
 	def implement_summation(self):
-		self.base.append(f"\n")
-	# Build ROMs and Nodes here.
+		self.base.append(f"\tlogic [{self.data_size - 1}:0] to_sum [{self.input_amount + 1}]; //extra to add in bias\n")
+		#Use logic we have in test_rom.sv to complete this taking
+		for i in range(self.input_amount):
+			self.base.append(f"\n\tm_2c_{data_size}b mul{i}(.x(inputs[{i}]), .y(weights[{i}]), .m_out(to_sum[{i}]));\n\n")
+		self.base.append(f"\tassign to_sum[{self.input_amount}] = bias;\n\n")
+		self.base.append(f"\tlogic carry [{self.input_amount + 1}];\n")
+		self.base.append(f"\tlogic [{self.data_size - 1}:0] sum_steps [{self.input_amount}];\n")
+		#adder loop
+		self.base.append(f"\tfa_{self.data_size}b adder0(.a(to_sum[0]), .b(to_sum[1]), .c_in(carry[0]), .s(sum_steps[0]), .c_out(carry[1]));\n")
+		for i in range(self.input_amount):
+			self.base.append(f"\tfa_{self.data_size}b adder{i}(\n")
+			self.base.append(f"\t\t.a(sum_steps[{i}]), .b(to_sum[{i+2}]), .c_in(carry[{i+1}]),\n")
+			self.base.append(f"\t\t.s(sum_steps[{i+1}]), .c_out(carry[{i+2}])\n")
+			self.base.append("\t);\n")
+		self.base.append(f"\t{self.activation_function_module.name} act_func(.r_in(sum_steps[{self.input_amount - 1}]), .r_out(node_res);\n")
+		self.base.append(f"endmodule //{self.name}\n")
+		
+	def output_base(self, file_ptr):
+		for string in self.base:
+			file_ptr.write(string)
 
 class BuildLayer():
-	def __init__(self, data_size, nodes):
-		'''only has output which is like [x:0] data [y]'''
+	def __init__(self, data_size, nodes, input_module, weight_modules, bias_module):
+		self.base = []
+		self.build_base()
+		self.implement_nodes()
+	
+	def build_base(self):
+		self.base.append(f"module {self.name}(\n")
+		self.base.append(f"\toutput [{self.data_size - 1}:0] data\n")
+		self.base.append(f");\n")
+
+	def implement_nodes(self):
+
+		'''only has output which is like [x:0] data [y] it creates the logic var for holding the rom data to pass to
+		the input, weight, and bias to the node'''
+		#Creates the both rom and node refferences and stores the rom data in vars that gets passed to the nodes.
+	#if it is input layer then the input part of the node will be the px array
+	#each node's node_res output will be saved to an logic array in layer that will be it's output the length 
+	# of the array for or first layer is 64
+	
 
 #TODO make output base just be a function that takes in the classes bases
 # Example of use cases
@@ -244,7 +274,7 @@ fa_32b = BasicModuleBuilder(
 		[fa_1b]
 	)
 
-mult_32c_4b = BasicModuleBuilder("m_2c", 32, [("x", 32), ("y", 32)], [("m_out", 32)], [ha, fa_1b])
+mult_2c_32 = BasicModuleBuilder("m_2c", 32, [("x", 32), ("y", 32)], [("m_out", 32)], [ha, fa_1b])
 
 # cla_1b = BasicModuleBuilder("cla", 4, [("a", 4), ("b", 4), ("c_in", 1)], [])
 
@@ -264,16 +294,19 @@ for i in range(node_count):
 
 bias_rom = RomModuleBuilder("bias_fc_rom", data_size, node_count, "./../Python-Parsing/fc_bias.dat")
 
+relu = ActivationFuncModuleBuilder("relu", 32)
+
 node_arr = []
 for i in range(node_count):
-	node_arr.append(BuildNode(f"fc_node_{i}", True, px_rom_arr[0], weight_rom_arr[i], bias_rom))
+	node_arr.append(BuildNode(f"fc_node_{i}", i, fa_32b, mult_2c_32, data_size, relu, input_amount))
 
 #TODO implement layer
+fc_layer = BuildLayer(data_size, node_arr, px_rom_arr[0], weight_rom_arr, bias_rom)
 
 file_output = open("test.sv", "w")
 ha.output_base(file_output)
 fa_1b.output_base(file_output)
 fa_32b.output_base(file_output)
-mult_32c_4b.output_base(file_output)
+mult_2c_32.output_base(file_output)
 
 # print(fa_1b.use_module([("a","bit0"), ("b", "bit1"), ("c_in", "bit2")], [("s", "bit_O_0"), ("c_out", "bit_O_1")]))
