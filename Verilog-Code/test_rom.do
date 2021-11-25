@@ -22,8 +22,7 @@ view list
 view wave
 
 # Diplays All Signals recursively 
-add wave -b -r /tb/test/*
-add wave -b -r /tb/test/mem
+add wave -b -r /tb/*
 
 -- Set Wave Output Items 
 TreeUpdate [SetDefaultTree]
