@@ -223,14 +223,16 @@ class BuildNode():
 		self.base.append(f"\tlogic [{self.data_size - 1}:0] to_sum [{self.input_amount + 1}]; //extra to add in bias\n")
 		#Use logic we have in test_rom.sv to complete this taking
 		for i in range(self.input_amount):
-			self.base.append(f"\n\tm_2c_{self.data_size}b mul{i}(.x(inputs[{i}]), .y(weights[{i}]), .m_out(to_sum[{i}]));\n\n")
+			#TODO use the mult module's inputs
+			self.base.append(f"\n\t{self.mult_module.name} mul{i}(.x(inputs[{i}]), .y(weights[{i}]), .m_out(to_sum[{i}]));\n\n")
 		self.base.append(f"\tassign to_sum[{self.input_amount}] = bias;\n\n")
 		self.base.append(f"\tlogic carry [{self.input_amount + 1}];\n")
 		self.base.append(f"\tlogic [{self.data_size - 1}:0] sum_steps [{self.input_amount}];\n")
 		#adder loop
-		self.base.append(f"\tfa_{self.data_size}b adder0(.a(to_sum[0]), .b(to_sum[1]), .c_in(carry[0]), .s(sum_steps[0]), .c_out(carry[1]));\n")
+		self.base.append(f"\t{self.adder_module.name} adder0(.a(to_sum[0]), .b(to_sum[1]), .c_in(carry[0]), .s(sum_steps[0]), .c_out(carry[1]));\n")
 		for i in range(self.input_amount):
-			self.base.append(f"\tfa_{self.data_size}b adder{i}(\n")
+			#TODO use the adder module's inputs
+			self.base.append(f"\t{self.adder_module.name} adder{i+1}(\n")
 			self.base.append(f"\t\t.a(sum_steps[{i}]), .b(to_sum[{i+2}]), .c_in(carry[{i+1}]),\n")
 			self.base.append(f"\t\t.s(sum_steps[{i+1}]), .c_out(carry[{i+2}])\n")
 			self.base.append("\t);\n")
