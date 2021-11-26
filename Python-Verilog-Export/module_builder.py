@@ -213,7 +213,7 @@ class BuildNode():
 	
 	def build_base(self):
 		self.base.append(f"module {self.name}(\n")
-		self.base.append(f"\tinput [{self.data_size - 1}:0] inputs [{self.input_amount }]\n")
+		self.base.append(f"\tinput [{self.data_size - 1}:0] input_data [{self.input_amount }]\n")
 		self.base.append(f"\tinput [{self.data_size - 1}:0] weights [{self.input_amount }]\n")
 		self.base.append(f"\tinput [{self.data_size - 1}:0] bias\n")
 		self.base.append(f"\toutput [{self.data_size - 1}:0] node_res\n")
@@ -223,7 +223,7 @@ class BuildNode():
 		self.base.append(f"\tlogic [{self.data_size - 1}:0] to_sum [{self.input_amount + 1}]; //extra to add in bias\n")
 		#Use logic we have in test_rom.sv to complete this taking
 		for i in range(self.input_amount):
-			self.base.append(f"\n\tm_2c_{data_size}b mul{i}(.x(inputs[{i}]), .y(weights[{i}]), .m_out(to_sum[{i}]));\n\n")
+			self.base.append(f"\n\tm_2c_{self.data_size}b mul{i}(.x(inputs[{i}]), .y(weights[{i}]), .m_out(to_sum[{i}]));\n\n")
 		self.base.append(f"\tassign to_sum[{self.input_amount}] = bias;\n\n")
 		self.base.append(f"\tlogic carry [{self.input_amount + 1}];\n")
 		self.base.append(f"\tlogic [{self.data_size - 1}:0] sum_steps [{self.input_amount}];\n")
@@ -241,114 +241,80 @@ class BuildNode():
 		for string in self.base:
 			file_ptr.write(string)
 
-#Layers combine each node's output
+# Layer deals with implementing the nodes, providing connection to their needed input, and combining their output.
+#	it will also implement the need weight and bias rom
 class BuildLayer():
-	def __init__(self, data_size, nodes, input_module, weight_modules, bias_module):
+	def __init__(self, name, data_size, input_count, nodes, weight_modules, bias_module):
+		self.name = name
+		self.data_size = data_size
+		self.input_count = input_count
+		self.node_count = len(nodes)
+		self.nodes = nodes
+		self.weight_mods = weight_modules
+		self.bias_mod = bias_module
 		self.base = []
+
 		self.build_base()
 		self.implement_nodes()
 	
 	def build_base(self):
 		self.base.append(f"module {self.name}(\n")
-		self.base.append(f"\tinput [{}:0] input_data [{}];\n")
-		self.base.append(f"\toutput [{self.data_size - 1}:0] data\n")
+		self.base.append(f"\tinput [{self.data_size - 1}:0] input_data [{self.input_count}];\n")
+		self.base.append(f"\toutput [{self.data_size - 1}:0] data [{self.node_count}]\n")
 		self.base.append(f");\n\n")
-		self.base.append(f"\t{};\n")
 
 	def implement_nodes(self):
+		# self.base.append(f"\tlogic [{self.data_size - 1}:0] node_data [{self.node_count}];\n")
+		self.base.append(f"\tlogic [{self.data_size - 1}:0] bias [{self.node_count}];\n")
+		self.base.append(f"\t{self.bias_mod.name} bias_rom(.data(bias));\n\n")
 		
-		'''only has output which is like [x:0] data [y] it creates the logic var for holding the rom data to pass to
-		the input, weight, and bias to the node'''
-		#Creates the both rom and node refferences and stores the rom data in vars that gets passed to the nodes.
-	#if it is input layer then the input part of the node will be the px array
-	#each node's node_res output will be saved to an logic array in layer that will be it's output the length 
-	# of the array for or first layer is 64
+		for i, node in enumerate(self.nodes):
+			self.base.append(f"\tlogic [{self.data_size - 1}:0] weights_{i} [{self.input_count}];\n")
+			self.base.append(f"\t{self.weight_mods[i].name} weight_rom_{i}(.data(weights_{i}));\n")
+			self.base.append(f"\t{node.name} node_{i}(.input_data(input_data), .weights(weights_{i}), .bias(bias[{i}]), .node_res(data[{i}]));\n\n")
+			
+		# self.base.append(f"\tassign data = node_data;\n")
+		self.base.append(f"endmodule //{self.name}\n")
 
-#TODO BUILD_NETWORK
-#Network connects all layers inits pic_ROM 
+	def output_base(self, file_ptr):
+		for string in self.base:
+			file_ptr.write(string)		
+
+#Network connects all layers, implements pic_ROM, and outputs the guess
 class BuildNetwork():
-	def __init__(self, data_size, input_amount, pic_count, px_module, layer_modules):
+	def __init__(self, data_size, output_amount, px_module, layer_modules):
 		self.data_size = data_size
-		self.input_amount = input_amount
-		self.pic_count = pic_count
+		self.output_amount = output_amount
 		self.px_mod = px_module
 		self.layers = layer_modules
 		self.layer_count = len(layer_modules)
+		self.base = []
 
 	def build_base(self):
 		self.base.append(f"module Network(\n")
-		self.base.append(f"\toutput [{self.data_size - 1}:0] guess [{self.pic_count}]\n")
+		self.base.append(f"\toutput [{self.data_size - 1}:0] guess [{self.output_amount}]\n")
 		self.base.append(f");\n\n")
-		self.base.append(f"\tlogic [{self.data_size - 1}:0] px_data [{self.input_amount}];\n")
-		self.base.append(f"\t{self.px_mod.name} pixels(.data(px_data));\n\n")
-		self.base.append(f"\tlogic [{self.data_size - 1}:0] layer_connections [{self.layer_count}];\n")
 	
 	def connect_layers(self):
 		'''Inits layers to use'''
-		for i in range(self.layer_count):
+		for i, layer in enumerate(self.layers):
 			if(i == 0):
 				'''Pass px_data as layer's input'''
+				self.base.append(f"\tlogic [{self.data_size - 1}:0] px_data [{layer.input_count}];\n")
+				self.base.append(f"\t{self.px_mod.name} pixels(.data(px_data));\n\n")
+				self.base.append(f"\tlogic [{self.data_size - 1}:0] layer_data_{i} [{layer.node_count}];\n")
+				self.base.append(f"\t{layer.name} layer_{i}(.input_data(px_data), .data(layer_data_{i}));\n\n")
+	
 			else:
 				'''Pass Prev layer connections index as input'''
+				self.base.append(f"\tlogic [{self.data_size - 1}:0] layer_data_{i} [{layer.node_count}];\n")
+				self.base.append(f"\t{layer.name} layer_{i}(.input_data(layer_data_{i-1}), .data(layer_data_{i}));\n\n")
+
 		#TODO implement max function? Change output guess to not be an array of 32 bit vals
-		self.base.append(f"assign guess = \n\n")
+		self.base.append(f"\tassign guess = layer_data_{len(self.layers - 1)};\n\n")
+		self.base.append("endmodule // Network\n")
 
+	def output_base(self, file_ptr):
+		for string in self.base:
+			file_ptr.write(string)
 #TODO make output base just be a function that takes in the classes bases
-# Example of use cases
-ha = BasicModuleBuilder("ha", 1, [("a", 1), ("b", 1)], [("s", 1), ("c_out", 1)])
-fa_1b = BasicModuleBuilder("fa", 1, [("a", 1), ("b", 1), ("c_in", 1)], [("s", 1), ("c_out", 1)])
-
-fa_32b = BasicModuleBuilder(
-		"fa", 32, 
-		[("a", 32), ("b", 32), ("c_in", 1)],
-		[("s", 32), ("c_out", 1)],
-		[fa_1b]
-	)
-
-mult_2c_32 = BasicModuleBuilder("m_2c", 32, [("x", 32), ("y", 32)], [("m_out", 32)], [ha, fa_1b])
-
-# cla_1b = BasicModuleBuilder("cla", 4, [("a", 4), ("b", 4), ("c_in", 1)], [])
-
-data_size = 32
-input_amount = 784
-node_count = 64 
-
-pic_to_use = 0
-
-px_rom_arr = []
-for i in range(10):
-	filename = f"./../Python-Parsing/image_of_{i}.dat"
-	px_rom_arr.append(RomModuleBuilder(f"pixel_rom_for_{i}", data_size, input_amount, filename))
-
-#TODO Weight, bias, and nodes need to be 2D arrays where the first index is it's corresponding layer
-
-weight_rom_arr = []
-for i in range(node_count):
-	filename = f"./../Python-Parsing/fc_weight_{i}.dat"
-	weight_rom_arr.append(RomModuleBuilder(f"weights_{i}_fc_rom", data_size, input_amount, i, filename))
-
-bias_rom = RomModuleBuilder("bias_fc_rom", data_size, node_count, "./../Python-Parsing/fc_bias.dat")
-
-relu = ActivationFuncModuleBuilder("relu", 32)
-
-node_arr = []
-for i in range(layer_count):
-	node_arr.append([])
-	for j in range(node_count)
-	node_arr.append(BuildNode(f"fc_node_{i}", i, fa_32b, mult_2c_32, data_size, relu, input_amount))
-
-
-fc_layer = BuildLayer(data_size, node_arr, px_rom_arr[pic_to_use], weight_rom_arr, bias_rom)
-#other layer
-layers_arr = [fc_layer]
-#layers_arr.append(X_layer)
-
-network = BuildNetwork(data_size, input_amount, len(px_rom_arr), px_rom_arr[pic_to_use], layers_arr)
-
-file_output = open("test.sv", "w")
-ha.output_base(file_output)
-fa_1b.output_base(file_output)
-fa_32b.output_base(file_output)
-mult_2c_32.output_base(file_output)
-
-# print(fa_1b.use_module([("a","bit0"), ("b", "bit1"), ("c_in", "bit2")], [("s", "bit_O_0"), ("c_out", "bit_O_1")]))
