@@ -241,6 +241,7 @@ class BuildNode():
 		for string in self.base:
 			file_ptr.write(string)
 
+#Layers combine each node's output
 class BuildLayer():
 	def __init__(self, data_size, nodes, input_module, weight_modules, bias_module):
 		self.base = []
@@ -249,20 +250,48 @@ class BuildLayer():
 	
 	def build_base(self):
 		self.base.append(f"module {self.name}(\n")
-		#TODO take in an input for first one it is the px_rom data the next ones will be the prev layer's output
-		# which is all created in the network module
+		self.base.append(f"\tinput [{}:0] input_data [{}];\n")
 		self.base.append(f"\toutput [{self.data_size - 1}:0] data\n")
-		self.base.append(f");\n")
+		self.base.append(f");\n\n")
+		self.base.append(f"\t{};\n")
 
 	def implement_nodes(self):
-
+		
 		'''only has output which is like [x:0] data [y] it creates the logic var for holding the rom data to pass to
 		the input, weight, and bias to the node'''
 		#Creates the both rom and node refferences and stores the rom data in vars that gets passed to the nodes.
 	#if it is input layer then the input part of the node will be the px array
 	#each node's node_res output will be saved to an logic array in layer that will be it's output the length 
 	# of the array for or first layer is 64
+
+#TODO BUILD_NETWORK
+#Network connects all layers inits pic_ROM 
+class BuildNetwork():
+	def __init__(self, data_size, input_amount, pic_count, px_module, layer_modules):
+		self.data_size = data_size
+		self.input_amount = input_amount
+		self.pic_count = pic_count
+		self.px_mod = px_module
+		self.layers = layer_modules
+		self.layer_count = len(layer_modules)
+
+	def build_base(self):
+		self.base.append(f"module Network(\n")
+		self.base.append(f"\toutput [{self.data_size - 1}:0] guess [{self.pic_count}]\n")
+		self.base.append(f");\n\n")
+		self.base.append(f"\tlogic [{self.data_size - 1}:0] px_data [{self.input_amount}];\n")
+		self.base.append(f"\t{self.px_mod.name} pixels(.data(px_data));\n\n")
+		self.base.append(f"\tlogic [{self.data_size - 1}:0] layer_connections [{self.layer_count}];\n")
 	
+	def connect_layers(self):
+		'''Inits layers to use'''
+		for i in range(self.layer_count):
+			if(i == 0):
+				'''Pass px_data as layer's input'''
+			else:
+				'''Pass Prev layer connections index as input'''
+		#TODO implement max function? Change output guess to not be an array of 32 bit vals
+		self.base.append(f"assign guess = \n\n")
 
 #TODO make output base just be a function that takes in the classes bases
 # Example of use cases
@@ -284,10 +313,14 @@ data_size = 32
 input_amount = 784
 node_count = 64 
 
+pic_to_use = 0
+
 px_rom_arr = []
 for i in range(10):
 	filename = f"./../Python-Parsing/image_of_{i}.dat"
 	px_rom_arr.append(RomModuleBuilder(f"pixel_rom_for_{i}", data_size, input_amount, filename))
+
+#TODO Weight, bias, and nodes need to be 2D arrays where the first index is it's corresponding layer
 
 weight_rom_arr = []
 for i in range(node_count):
@@ -299,11 +332,18 @@ bias_rom = RomModuleBuilder("bias_fc_rom", data_size, node_count, "./../Python-P
 relu = ActivationFuncModuleBuilder("relu", 32)
 
 node_arr = []
-for i in range(node_count):
+for i in range(layer_count):
+	node_arr.append([])
+	for j in range(node_count)
 	node_arr.append(BuildNode(f"fc_node_{i}", i, fa_32b, mult_2c_32, data_size, relu, input_amount))
 
-#TODO implement layer
-fc_layer = BuildLayer(data_size, node_arr, px_rom_arr[0], weight_rom_arr, bias_rom)
+
+fc_layer = BuildLayer(data_size, node_arr, px_rom_arr[pic_to_use], weight_rom_arr, bias_rom)
+#other layer
+layers_arr = [fc_layer]
+#layers_arr.append(X_layer)
+
+network = BuildNetwork(data_size, input_amount, len(px_rom_arr), px_rom_arr[pic_to_use], layers_arr)
 
 file_output = open("test.sv", "w")
 ha.output_base(file_output)
