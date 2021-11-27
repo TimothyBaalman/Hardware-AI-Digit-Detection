@@ -52,11 +52,11 @@ output_json_file.close()
 
 #Output weights fc dat files
 for index, vals in enumerate(converted_json_oputput["fc_weights"]):
-	with open(f"{root}/fc_weight_{index}.dat", "w") as fc_file:
+	with open(f"{root}/layer0_weight_{index}.dat", "w") as fc_file:
 		for val in vals:
 			fc_file.write(f"{val}\n")
 
 # output bias fc dat
-with open(f"{root}/fc_bias.dat", "w") as fc_file:
+with open(f"{root}/layer0_bias.dat", "w") as fc_file:
 	for index, val in enumerate(converted_json_oputput["fc_bias"]):
 		fc_file.write(f"{val}\n")
