@@ -50,13 +50,36 @@ except Exception as e:
 		print(e)
 output_json_file.close()
 
-#Output weights fc dat files
-for index, vals in enumerate(converted_json_oputput["fc_weights"]):
-	with open(f"{root}/layer0_weight_{index}.dat", "w") as fc_file:
-		for val in vals:
-			fc_file.write(f"{val}\n")
+layer_count = 0
+loop_count = 0
+for key in converted_json_oputput:
+	if(loop_count % 2 == 0 and loop_count != 0):
+		layer_count += 1
+	
+	# Output bias 
+	if("bias" in key):
+		with open(f"{root}/layer{layer_count}_bias.dat", "w") as bias_file:
+			for index, val in enumerate(converted_json_oputput[key]):
+				bias_file.write(f"{val}\n")
+	
+	# Output weights 
+	elif("weight" in key): 
+		for index, vals in enumerate(converted_json_oputput[key]):
+			with open(f"{root}/layer{layer_count}_weight_{index}.dat", "w") as weight_file:
+				for val in vals:
+					weight_file.write(f"{val}\n")
+		
 
-# output bias fc dat
-with open(f"{root}/layer0_bias.dat", "w") as fc_file:
-	for index, val in enumerate(converted_json_oputput["fc_bias"]):
-		fc_file.write(f"{val}\n")
+	print(key)
+	loop_count += 1
+
+# #Output weights fc dat files
+# for index, vals in enumerate(converted_json_oputput["fc_weights"]):
+# 	with open(f"{root}/layer0_weight_{index}.dat", "w") as fc_file:
+# 		for val in vals:
+# 			fc_file.write(f"{val}\n")
+
+# # output bias fc dat
+# with open(f"{root}/layer0_bias.dat", "w") as fc_file:
+# 	for index, val in enumerate(converted_json_oputput["fc_bias"]):
+# 		fc_file.write(f"{val}\n")
