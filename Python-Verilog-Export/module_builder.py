@@ -302,11 +302,11 @@ class BuildNetwork():
 		self.base.append("endmodule // Network\n")
 
 
-def OutputNetworkTestbench():
+def output_network_testbench():
 	file = open("Network_tb.sv", "w")
 
 
-def OutputNetworkDo():
+def output_network_do():
 	file = open("Network.do", "w")
 	
 	output = ["onbreak {resume}\n"]
