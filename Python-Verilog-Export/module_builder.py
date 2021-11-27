@@ -4,6 +4,10 @@ from full_adder_n_bit import fa_operations
 from half_adder import ha_operations
 from twos_compliment_multiplier import mult_2c_operations
 
+def write_to_file(arr, file_ptr):
+		for string in arr:
+			file_ptr.write(string)
+
 class BasicModuleBuilder():
 	def __init__(self, module_type, n_bits = 1, input_vals = [], output_vals = [], needed_submodules = []):
 		self.module_type = module_type
@@ -120,12 +124,6 @@ class BasicModuleBuilder():
 		
 		self.base.append(f");\n")
 
-	def output_base(self, file_ptr):
-		for string in self.base:
-			file_ptr.write(string)
-		# Free memory?
-		# del(self.base)
-
 	# Passed in values are a tuple array where the first index is the matching name from base and the second is the bit name to link to the base
 	def use_module(self, passed_in_inputs = [], pass_in_outputs = []):
 		output = [f"{self.module_name} {self.module_name}{self.used_count}(\n"]
@@ -172,10 +170,6 @@ class RomModuleBuilder():
 		self.base.append(f"\tassign data = mem; \n\n")
 		self.base.append(f"endmodule")
 
-	def output_base(self, file_ptr):
-		for string in self.base:
-			file_ptr.write(string)
-
 class ActivationFuncModuleBuilder():
 	def __init__(self, name, data_size):
 		self.name = name
@@ -193,9 +187,6 @@ class ActivationFuncModuleBuilder():
 		self.base.append(f"\tassign r_out = (r_in[{self.data_size-1}] == 0) ? r_in : {self.data_size}'b0;\n")
 		self.base.append("endmodule\n")
 
-	def output_base(self, file_ptr):
-		for string in self.base:
-			file_ptr.write(string)
 
 class BuildNode():
 	def __init__(self, name, node_index, adder_module, mult_module, data_size, activation_function_module, input_amount):
@@ -239,9 +230,6 @@ class BuildNode():
 		self.base.append(f"\t{self.activation_function_module.name} act_func(.r_in(sum_steps[{self.input_amount - 1}]), .r_out(node_res);\n")
 		self.base.append(f"endmodule //{self.name}\n")
 
-	def output_base(self, file_ptr):
-		for string in self.base:
-			file_ptr.write(string)
 
 # Layer deals with implementing the nodes, providing connection to their needed input, and combining their output.
 #	it will also implement the need weight and bias rom
@@ -277,10 +265,7 @@ class BuildLayer():
 			
 		# self.base.append(f"\tassign data = node_data;\n")
 		self.base.append(f"endmodule //{self.name}\n")
-
-	def output_base(self, file_ptr):
-		for string in self.base:
-			file_ptr.write(string)		
+		
 
 #Network connects all layers, implements pic_ROM, and outputs the guess
 class BuildNetwork():
@@ -316,7 +301,38 @@ class BuildNetwork():
 		self.base.append(f"\tassign guess = layer_data_{len(self.layers - 1)};\n\n")
 		self.base.append("endmodule // Network\n")
 
-	def output_base(self, file_ptr):
-		for string in self.base:
-			file_ptr.write(string)
-#TODO make output base just be a function that takes in the classes bases
+
+def OutputNetworkTestbench():
+	file = open("Network_tb.sv", "w")
+
+
+def OutputNetworkDo():
+	file = open("Network.do", "w")
+	
+	output = ["onbreak {resume}\n"]
+
+	output.append("# create library\nif [file exists work] {\n\tvdel -all\n}\nvlib work")
+
+	output.append("# compile source files\nvlog Network.sv Network_tb.sv\n")
+
+	output.append("# start and run simulation\nvsim -voptargs=+acc work.tb")
+
+	output.append("view list\nview wave\n")
+
+	output.append("# Diplays All Signals recursively\nadd wave -b -r /tb/*\n")
+
+	output.append("-- Set Wave Output Items\n")
+	output.append("TreeUpdate [SetDefaultTree]\n")
+	output.append("WaveRestoreZoom {0 ps} {75 ns}\n")
+	output.append("configure wave -namecolwidth 150\n")
+	output.append("configure wave -valuecolwidth 100\n")
+	output.append("configure wave -justifyvalue left\n")
+	output.append("configure wave -signalnamewidth 0\n")
+	output.append("configure wave -snapdistance 10\n")
+	output.append("configure wave -datasetprefix 0\n")
+	output.append("configure wave -rowmargin 4\n")
+	output.append("configure wave -childrowmargin 2\n")
+
+	output.append("-- Run the Simulation\nrun 120ns\n")
+
+	write_to_file(output, file)
