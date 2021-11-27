@@ -10,48 +10,68 @@ fa_32b = BasicModuleBuilder(
 		[fa_1b]
 	)
 
-mult_2c_32 = BasicModuleBuilder("m_2c", 32, [("x", 32), ("y", 32)], [("m_out", 32)], [ha, fa_1b])
+mult_2c_32b = BasicModuleBuilder("m_2c", 32, [("x", 32), ("y", 32)], [("m_out", 32)], [ha, fa_1b])
 
 # cla_1b = BasicModuleBuilder("cla", 4, [("a", 4), ("b", 4), ("c_in", 1)], [])
 
 data_size = 32
-first_layer_input_amount = 784
-first_layer_node_count = 64 
-
 pic_to_use = 0
+pic_size = 784
+pic_types = 10
+
+num_of_layers = 2
+input_amount = [784, 64]
+node_count = [64, 10]
 
 px_rom_arr = []
-for i in range(10):
+for i in range(pic_types):
 	filename = f"./../Python-Parsing/image_of_{i}.dat"
-	px_rom_arr.append(RomModuleBuilder(f"pixel_rom_for_{i}", data_size, first_layer_input_amount, filename))
+	px_rom_arr.append(RomModuleBuilder(f"pixel_rom_for_{i}", data_size, pic_size, filename))
 
-#TODO Weight, bias, and nodes need to be 2D arrays where the first index is it's corresponding layer
+relu = ActivationFuncModuleBuilder("relu", data_size)
 
-first_layer_weights = []
-for i in range(first_layer_node_count):
-	filename = f"./../Python-Parsing/fc_weight_{i}.dat"
-	first_layer_weights.append(RomModuleBuilder(f"weights_{i}_fc_rom", data_size, first_layer_input_amount, i, filename))
+layer_weights = []
+layer_bias = []
+layer_nodes = []
+layers = []
 
-first_layer_bias = RomModuleBuilder("bias_fc_rom", data_size, first_layer_node_count, "./../Python-Parsing/fc_bias.dat")
+for i in range(num_of_layers):
+	layer_weights.append([])
+	layer_bias.append([])
+	layer_nodes.append([])
+	
+	layer_bias[i].append(RomModuleBuilder(f"layer{i}_bias_rom", data_size, node_count[i], f"./../Python-Parsing/layer{i}_bias.dat"))
+	for j in range(node_count[i]):
+		weight_file = f"./../Python-Parsing/layer_{i}_weight_{j}.dat"
+		layer_weights[i].append(RomModuleBuilder(f"layer{i}_weight_{j}_rom", data_size, input_amount[i], j, weight_file))
 
-relu = ActivationFuncModuleBuilder("relu", 32)
+		layer_nodes[i].append(BuildNode(f"layer{i}_node_{j}", j, fa_32b, mult_2c_32b, data_size, relu, input_amount[i]))
 
-first_layer_nodes = []
-for i in range(first_layer_node_count):
-	first_layer_nodes.append(BuildNode(f"fc_node_{i}", i, fa_32b, mult_2c_32, data_size, relu, first_layer_input_amount))
+	layers.append(BuildLayer(f"layer_{i}", data_size, input_amount[i], layer_nodes[i], layer_weights[i], layer_bias[i]))
 
+network = BuildNetwork(data_size, len(px_rom_arr), px_rom_arr[pic_to_use], layers)
 
-fc_layer = BuildLayer("fc_layer", data_size, first_layer_input_amount, first_layer_nodes, px_rom_arr[pic_to_use], first_layer_weights, first_layer_bias)
-#other layer
-layers_arr = [fc_layer]
-#layers_arr.append(X_layer)
+file_output = open("Network.sv", "w")
+write_to_file(ha.base, file_output)
+write_to_file(fa_1b.base, file_output)
+write_to_file(fa_32b.base, file_output)
+write_to_file(mult_2c_32b.base, file_output)
 
-network = BuildNetwork(data_size, len(px_rom_arr), px_rom_arr[pic_to_use], layers_arr)
+for px_mod in px_rom_arr:
+	write_to_file(px_mod.base, file_output)
 
-file_output = open("test.sv", "w")
-ha.output_base(file_output)
-fa_1b.output_base(file_output)
-fa_32b.output_base(file_output)
-mult_2c_32.output_base(file_output)
+for i in range(num_of_layers):
+	for weight_mod in layer_weights[i]:
+		write_to_file(weight_mod.base, file_output)
 
+	for bias_mod in layer_bias[i]:
+		write_to_file(bias_mod.base, file_output)
+
+	for node_mod in layer_nodes[i]:
+		write_to_file(node_mod.base, file_output)
+	
+	write_to_file(layers[i].base, file_output)
+
+output_network_testbench()
+output_network_do()
 # print(fa_1b.use_module([("a","bit0"), ("b", "bit1"), ("c_in", "bit2")], [("s", "bit_O_0"), ("c_out", "bit_O_1")]))
