@@ -5,14 +5,14 @@ from half_adder import ha_operations
 from twos_compliment_multiplier import mult_2c_operations
 
 def write_to_file(arr, file_ptr):
-		for string in arr:
-			file_ptr.write(string)
+	for string in arr:
+		file_ptr.write(string)
 
 class BasicModuleBuilder():
 	def __init__(self, module_type, n_bits = 1, input_vals = [], output_vals = [], needed_submodules = []):
 		self.module_type = module_type
-		self.module_name = module_type + f"_{n_bits}b"
-		print(self.module_name)
+		self.name = module_type + f"_{n_bits}b"
+		print(self.name)
 		self.n = n_bits
 
 		self.input_vals = input_vals
@@ -45,11 +45,11 @@ class BasicModuleBuilder():
 		for operation in module_operations:
 			self.base += operation
 
-		self.base.append(f"endmodule // for module {self.module_name}\n\n")
+		self.base.append(f"endmodule // for module {self.name}\n\n")
   
 	def build_base(self):
 		self.base = []
-		self.base.append(f"module {self.module_name}(\n")
+		self.base.append(f"module {self.name}(\n")
 
 		matching_bits = {
 			"inputs":{},
@@ -57,7 +57,7 @@ class BasicModuleBuilder():
 		}
 		# Setup matching bits for inputs
 		for inputs in self.input_vals:
-			print(f"Inputs {self.module_name}: {matching_bits}")
+			print(f"Inputs {self.name}: {matching_bits}")
 			name, bits = inputs
 			len_stored = len(matching_bits["inputs"])
 			if(not matching_bits["inputs"]):
@@ -75,7 +75,7 @@ class BasicModuleBuilder():
 						break
 		# Setup matching bits for outputs
 		for outputs in self.output_vals:
-			print(f"Outputs {self.module_name}: {matching_bits}")
+			print(f"Outputs {self.name}: {matching_bits}")
 			name, bits = outputs
 			len_stored = len(matching_bits["outputs"])
 			if(not matching_bits["outputs"]):
@@ -126,7 +126,7 @@ class BasicModuleBuilder():
 
 	# Passed in values are a tuple array where the first index is the matching name from base and the second is the bit name to link to the base
 	def use_module(self, passed_in_inputs = [], pass_in_outputs = []):
-		output = [f"{self.module_name} {self.module_name}{self.used_count}(\n"]
+		output = [f"{self.name} {self.name}{self.used_count}(\n"]
 		in_size = len(self.input_vals)
 		out_size = len(self.output_vals)
 		# Possibly change to assume the indexes should be matching instead of matching names and just past in the name of 
@@ -167,8 +167,8 @@ class RomModuleBuilder():
 		self.base.append(f"\tinitial begin\n")
 		self.base.append(f'\t\t $readmemb("{dat_file_path}", mem);\n')
 		self.base.append(f"\tend\n")
-		self.base.append(f"\tassign data = mem; \n\n")
-		self.base.append(f"endmodule")
+		self.base.append(f"\tassign data = mem; \n")
+		self.base.append(f"endmodule // for {self.name}\n\n")
 
 class ActivationFuncModuleBuilder():
 	def __init__(self, name, data_size):
@@ -215,12 +215,12 @@ class BuildNode():
 		#Use logic we have in test_rom.sv to complete this taking
 		for i in range(self.input_amount):
 			#TODO use the mult module's inputs
-			self.base.append(f"\n\t{self.mult_module.name} mul{i}(.x(inputs[{i}]), .y(weights[{i}]), .m_out(to_sum[{i}]));\n\n")
-		self.base.append(f"\tassign to_sum[{self.input_amount}] = bias;\n\n")
+			self.base.append(f"\n\t{self.mult_module.name} mul{i}(.x(inputs[{i}]), .y(weights[{i}]), .m_out(to_sum[{i}]));\n")
+		self.base.append(f"\n\tassign to_sum[{self.input_amount}] = bias;\n\n")
 		self.base.append(f"\tlogic carry [{self.input_amount + 1}];\n")
-		self.base.append(f"\tlogic [{self.data_size - 1}:0] sum_steps [{self.input_amount}];\n")
+		self.base.append(f"\tlogic [{self.data_size - 1}:0] sum_steps [{self.input_amount}];\n\n")
 		#adder loop
-		self.base.append(f"\t{self.adder_module.name} adder0(.a(to_sum[0]), .b(to_sum[1]), .c_in(carry[0]), .s(sum_steps[0]), .c_out(carry[1]));\n")
+		self.base.append(f"\t{self.adder_module.name} adder0(\n\t\t.a(to_sum[0]), .b(to_sum[1]), .c_in(carry[0]), \n\t\t.s(sum_steps[0]), .c_out(carry[1])\n\t);\n")
 		for i in range(self.input_amount):
 			#TODO use the adder module's inputs
 			self.base.append(f"\t{self.adder_module.name} adder{i+1}(\n")
@@ -228,7 +228,7 @@ class BuildNode():
 			self.base.append(f"\t\t.s(sum_steps[{i+1}]), .c_out(carry[{i+2}])\n")
 			self.base.append("\t);\n")
 		self.base.append(f"\t{self.activation_function_module.name} act_func(.r_in(sum_steps[{self.input_amount - 1}]), .r_out(node_res);\n")
-		self.base.append(f"endmodule //{self.name}\n")
+		self.base.append(f"endmodule //{self.name}\n\n")
 
 
 # Layer deals with implementing the nodes, providing connection to their needed input, and combining their output.
@@ -264,7 +264,7 @@ class BuildLayer():
 			self.base.append(f"\t{node.name} node_{i}(.input_data(input_data), .weights(weights_{i}), .bias(bias[{i}]), .node_res(data[{i}]));\n\n")
 			
 		# self.base.append(f"\tassign data = node_data;\n")
-		self.base.append(f"endmodule //{self.name}\n")
+		self.base.append(f"endmodule //{self.name}\n\n")
 		
 
 #Network connects all layers, implements pic_ROM, and outputs the guess
@@ -276,6 +276,8 @@ class BuildNetwork():
 		self.layers = layer_modules
 		self.layer_count = len(layer_modules)
 		self.base = []
+		self.build_base()
+		self.connect_layers()
 
 	def build_base(self):
 		self.base.append(f"module Network(\n")
@@ -283,27 +285,25 @@ class BuildNetwork():
 		self.base.append(f");\n\n")
 	
 	def connect_layers(self):
-		'''Inits layers to use'''
 		for i, layer in enumerate(self.layers):
 			if(i == 0):
-				'''Pass px_data as layer's input'''
 				self.base.append(f"\tlogic [{self.data_size - 1}:0] px_data [{layer.input_count}];\n")
 				self.base.append(f"\t{self.px_mod.name} pixels(.data(px_data));\n\n")
 				self.base.append(f"\tlogic [{self.data_size - 1}:0] layer_data_{i} [{layer.node_count}];\n")
 				self.base.append(f"\t{layer.name} layer_{i}(.input_data(px_data), .data(layer_data_{i}));\n\n")
 	
 			else:
-				'''Pass Prev layer connections index as input'''
 				self.base.append(f"\tlogic [{self.data_size - 1}:0] layer_data_{i} [{layer.node_count}];\n")
 				self.base.append(f"\t{layer.name} layer_{i}(.input_data(layer_data_{i-1}), .data(layer_data_{i}));\n\n")
 
 		#TODO implement max function? Change output guess to not be an array of 32 bit vals
-		self.base.append(f"\tassign guess = layer_data_{len(self.layers - 1)};\n\n")
+		self.base.append(f"\tassign guess = layer_data_{len(self.layers)- 1};\n\n")
 		self.base.append("endmodule // Network\n")
 
 
 def output_network_testbench():
 	file = open("Network_tb.sv", "w")
+	file.write(f"module tb;\n\tlogic [31:0] out;\n\tNetwork net(.guess(out));\nendmodule")
 
 
 def output_network_do():

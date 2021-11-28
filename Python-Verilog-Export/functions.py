@@ -1,7 +1,7 @@
 def use_ha(index, a = ("a", "passed_in", -1), b = ("b", "passed_in", -1),
 	s = ("s", "passed_in", -1), c_out = ("c_out", "passed_in", -1)):
 
-	output = f"\ha_1b ha{index}(\n"
+	output = f"\tha_1b ha{index}(\n"
 	if(a[2] == -1):
 		output += f"\t\t.{a[0]}({a[1]}), "
 	else:
