@@ -115,7 +115,7 @@ def mult_2c_operations(n, inputs, outputs, submodules):
 	if(n == 32): # Assuming fractional chop for predetermined m.n values in Qm.n
 		integer_part_size = 17 #m
 		fractional_part_size = 14 #n
-		output.append(f"\n\tassign {m_out} = {wire_result}[{(2*n-1)-(integer_part_size+1)}:{fractional_part_size}]\n")
+		output.append(f"\n\tassign {m_out} = {wire_result}[{(2*n-1)-(integer_part_size+1)}:{fractional_part_size}];\n")
 	else: # Basic chop
 		output.append(f"\n\tassign {m_out} = {wire_result}[{n-1}:0];\n")
 

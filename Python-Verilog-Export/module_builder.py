@@ -187,7 +187,6 @@ class ActivationFuncModuleBuilder():
 		self.base.append(f"\tassign r_out = (r_in[{self.data_size-1}] == 0) ? r_in : {self.data_size}'b0;\n")
 		self.base.append("endmodule\n")
 
-
 class BuildNode():
 	def __init__(self, name, node_index, adder_module, mult_module, data_size, activation_function_module, input_amount):
 		self.name = name 
@@ -204,9 +203,9 @@ class BuildNode():
 	
 	def build_base(self):
 		self.base.append(f"module {self.name}(\n")
-		self.base.append(f"\tinput [{self.data_size - 1}:0] input_data [{self.input_amount }]\n")
-		self.base.append(f"\tinput [{self.data_size - 1}:0] weights [{self.input_amount }]\n")
-		self.base.append(f"\tinput [{self.data_size - 1}:0] bias\n")
+		self.base.append(f"\tinput [{self.data_size - 1}:0] input_data [{self.input_amount }],\n")
+		self.base.append(f"\tinput [{self.data_size - 1}:0] weights [{self.input_amount }],\n")
+		self.base.append(f"\tinput [{self.data_size - 1}:0] bias,\n")
 		self.base.append(f"\toutput [{self.data_size - 1}:0] node_res\n")
 		self.base.append(f");\n")
 
@@ -215,7 +214,7 @@ class BuildNode():
 		#Use logic we have in test_rom.sv to complete this taking
 		for i in range(self.input_amount):
 			#TODO use the mult module's inputs
-			self.base.append(f"\n\t{self.mult_module.name} mul{i}(.x(inputs[{i}]), .y(weights[{i}]), .m_out(to_sum[{i}]));\n")
+			self.base.append(f"\n\t{self.mult_module.name} mul{i}(.x(input_data[{i}]), .y(weights[{i}]), .m_out(to_sum[{i}]));\n")
 		self.base.append(f"\n\tassign to_sum[{self.input_amount}] = bias;\n\n")
 		self.base.append(f"\tlogic carry [{self.input_amount + 1}];\n")
 		self.base.append(f"\tlogic [{self.data_size - 1}:0] sum_steps [{self.input_amount}];\n\n")
@@ -227,7 +226,7 @@ class BuildNode():
 			self.base.append(f"\t\t.a(sum_steps[{i}]), .b(to_sum[{i+2}]), .c_in(carry[{i+1}]),\n")
 			self.base.append(f"\t\t.s(sum_steps[{i+1}]), .c_out(carry[{i+2}])\n")
 			self.base.append("\t);\n")
-		self.base.append(f"\t{self.activation_function_module.name} act_func(.r_in(sum_steps[{self.input_amount - 1}]), .r_out(node_res);\n")
+		self.base.append(f"\t{self.activation_function_module.name} act_func(.r_in(sum_steps[{self.input_amount - 1}]), .r_out(node_res));\n")
 		self.base.append(f"endmodule //{self.name}\n\n")
 
 
@@ -249,7 +248,7 @@ class BuildLayer():
 	
 	def build_base(self):
 		self.base.append(f"module {self.name}(\n")
-		self.base.append(f"\tinput [{self.data_size - 1}:0] input_data [{self.input_count}];\n")
+		self.base.append(f"\tinput [{self.data_size - 1}:0] input_data [{self.input_count}],\n")
 		self.base.append(f"\toutput [{self.data_size - 1}:0] data [{self.node_count}]\n")
 		self.base.append(f");\n\n")
 
@@ -309,17 +308,17 @@ def output_network_testbench(output_count):
 def output_network_do():
 	file = open("Network.do", "w")
 	
-	output = ["onbreak {resume}\n"]
+	output = ["onbreak {resume}\n\n"]
 
-	output.append("# create library\nif [file exists work] {\n\tvdel -all\n}\nvlib work")
+	output.append("# create library\nif [file exists work] {\n\tvdel -all\n}\nvlib work\n\n")
 
-	output.append("# compile source files\nvlog Network.sv Network_tb.sv\n")
+	output.append("# compile source files\nvlog Network.sv Network_tb.sv\n\n")
 
-	output.append("# start and run simulation\nvsim -voptargs=+acc work.tb")
+	output.append("# start and run simulation\nvsim -voptargs=+acc work.tb\n")
 
-	output.append("view list\nview wave\n")
+	output.append("view list\nview wave\n\n")
 
-	output.append("# Diplays All Signals recursively\nadd wave -b -r /tb/*\n")
+	output.append("# Diplays All Signals recursively\nadd wave -b -r /tb/*\n\n")
 
 	output.append("-- Set Wave Output Items\n")
 	output.append("TreeUpdate [SetDefaultTree]\n")
@@ -331,8 +330,8 @@ def output_network_do():
 	output.append("configure wave -snapdistance 10\n")
 	output.append("configure wave -datasetprefix 0\n")
 	output.append("configure wave -rowmargin 4\n")
-	output.append("configure wave -childrowmargin 2\n")
+	output.append("configure wave -childrowmargin 2\n\n")
 
-	output.append("-- Run the Simulation\nrun 120ns\n")
+	output.append("-- Run the Simulation\nrun 120000ns\n")
 
 	write_to_file(output, file)

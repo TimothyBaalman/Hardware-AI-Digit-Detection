@@ -57,6 +57,8 @@ write_to_file(fa_1b.base, file_output)
 write_to_file(fa_32b.base, file_output)
 write_to_file(mult_2c_32b.base, file_output)
 
+write_to_file(relu.base, file_output)
+
 for px_mod in px_rom_arr:
 	write_to_file(px_mod.base, file_output)
 
