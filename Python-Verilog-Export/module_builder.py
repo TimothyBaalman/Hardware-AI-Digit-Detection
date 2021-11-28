@@ -301,9 +301,9 @@ class BuildNetwork():
 		self.base.append("endmodule // Network\n")
 
 
-def output_network_testbench():
+def output_network_testbench(output_count):
 	file = open("Network_tb.sv", "w")
-	file.write(f"module tb;\n\tlogic [31:0] out;\n\tNetwork net(.guess(out));\nendmodule")
+	file.write(f"module tb;\n\tlogic [31:0] out [{output_count}];\n\tNetwork net(.guess(out));\nendmodule")
 
 
 def output_network_do():

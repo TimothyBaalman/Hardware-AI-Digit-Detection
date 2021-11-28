@@ -17,14 +17,14 @@ mult_2c_32b = BasicModuleBuilder("m_2c", 32, [("x", 32), ("y", 32)], [("m_out", 
 data_size = 32
 pic_to_use = 0
 pic_size = 784
-pic_types = 10
+num_pic_types = 10
 
 num_of_layers = 2
 input_amount = [784, 64]
 node_count = [64, 10]
 
 px_rom_arr = []
-for i in range(pic_types):
+for i in range(num_pic_types):
 	filename = f"./../Python-Parsing/image_of_{i}.dat"
 	px_rom_arr.append(RomModuleBuilder(f"pixel_rom_for_{i}", data_size, pic_size, filename))
 
@@ -74,6 +74,6 @@ for i in range(num_of_layers):
 
 write_to_file(network.base, file_output)
 
-output_network_testbench()
+output_network_testbench(num_pic_types)
 output_network_do()
 # print(fa_1b.use_module([("a","bit0"), ("b", "bit1"), ("c_in", "bit2")], [("s", "bit_O_0"), ("c_out", "bit_O_1")]))
