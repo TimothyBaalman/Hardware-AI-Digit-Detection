@@ -1,4 +1,3 @@
-from _typeshed import Self
 import json
 import math
 from full_adder_n_bit import fa_operations
@@ -217,15 +216,31 @@ class BuildNode():
 		self.base.append(f");\n")
 
 	def implement_summation(self):
+		self.base.append(f"\tlogic [{self.data_size - 1}:0] grp_inputs [{self.input_amount + 1}];\n")
+		self.base.append(f"\tlogic [{self.data_size - 1}:0] eqlz_weights [{self.input_amount + 1}];\n\n")
+		self.base.append(f"\t//group inputs\n")
+		for i in range(self.input_amount + 1):
+			if(i == self.input_amount):
+				self.base.append(f"\tassign grp_inputs[{i}] = bias;\n\n")
+			else:
+				self.base.append(f"\tassign grp_inputs[{i}] = input_data[{i}];\n")
+		self.base.append(f"\t//equalize weights\n")
+		for i in range(self.input_amount + 1):
+			if(i == self.input_amount):
+				self.base.append(f"\tassign eqlz_weights[{i}] = 32'b01; // bias * 1\n\n")
+			else:
+				self.base.append(f"\tassign eqlz_weights[{i}] = weights[{i}];\n")
+		
 		self.base.append(f"\tlogic [{self.data_size - 1}:0] sum_res = 32'b0;\n")
 		self.base.append(f"\tlogic carry = 1'b0;\n\n")
 
 		self.base.append(f"\tlogic [{self.data_size - 1}:0] mult_res;\n\n")
 
+		#There is a likely error where the inputs need to be in the second spot on the mult and the weights in the first
 		self.base.append(f"\tinteger i = 0; //change to logic [31:0] for syn\n")
 		self.base.append(f"\talways @(posedge clk) begin\n")
 		self.base.append(f"\t\tif(enabled) begin\n")
-		self.base.append(f"\t\t\t{self.mult_module.name} mul(.{self.mult_module.input_names[0]}(input_data[i]), .{self.mult_module.input_names[1]}(weights[i]), .{self.mult_module.output_names[0]}(mult_res));\n")
+		self.base.append(f"\t\t\t{self.mult_module.name} mul(.{self.mult_module.input_names[0]}(grp_inputs[i]), .{self.mult_module.input_names[1]}(eqlz_weights[i]), .{self.mult_module.output_names[0]}(mult_res));\n")
 		self.base.append(f"\t\t\ti = i + 1;\n")
 		self.base.append(f"\t\tend\n")
 		self.base.append(f"\tend\n\n")
@@ -233,17 +248,12 @@ class BuildNode():
 		self.base.append(f"\talways @(negedge clk) begin\n")
 		self.base.append(f"\t\tif(enabled) begin\n")
 		self.base.append(f"\t\t\t{self.adder_module.name} adder0(\n")
-		self.base.append(f"\t\t\t\t.{self.adder_module.input_names[0]}(sum_res), .{self.adder_module.input_names[1]}(mult_res), .{self.adder_module.input_names[2]}(carry)\n")
+		self.base.append(f"\t\t\t\t.{self.adder_module.input_names[0]}(sum_res), .{self.adder_module.input_names[1]}(mult_res), .{self.adder_module.input_names[2]}(carry), \n")
 		self.base.append(f"\t\t\t\t.{self.adder_module.output_names[0]}(sum_res), .{self.adder_module.output_names[1]}(carry)\n")
 		self.base.append(f"\t\t\t);\n")
 		self.base.append(f"\t\tend\n")
 		self.base.append(f"\tend\n\n")
 
-		self.base.append(f"\talways @(negedge enabled) begin\n")
-		self.base.append(f"\t\t{self.adder_module.name} adder1(\n")
-		self.base.append(f"\t\t\t.{self.adder_module.input_names[0]}(sum_res), .{self.adder_module.input_names[1]}(bias), .{self.adder_module.input_names[2]}(carry)\n")
-		self.base.append(f"\t\t\t.{self.adder_module.output_names[0]}(sum_res), .{self.adder_module.output_names[1]}(carry)\n")
-		self.base.append(f"\t\t);\n")
 		self.base.append(f"\talways @(negedge enabled) begin\n")
 		self.base.append(f"\t\t{self.activation_function_module.name} act_func(.{self.activation_function_module.input_name}(sum_res), .{self.activation_function_module.output_name}(sum_res));\n")
 		self.base.append(f"\tend\n\n")
@@ -306,16 +316,18 @@ class BuildLayer():
 		self.base.append(f"endmodule //{self.name}\n\n")
 		
 class BuildControl():
-	def __init__(self, layer_modules):
+	def __init__(self, name, layer_modules):
+		self.name = name
 		self.layer_mods = layer_modules
 		self.layer_enables = []
 		self.base = []
 		self.build_base()
+		self.build_control()
 	
 	def build_base(self):
-		self.base.append("module control(\n")
+		self.base.append(f"module {self.name}(\n")
 		self.base.append("\toutput clk,\n")
-		for i in len(self.layer_mods):
+		for i in range(len(self.layer_mods)):
 			self.layer_enables.append(f"layer{i}_en")
 
 			if(i == len(self.layer_mods) - 1):
@@ -323,39 +335,38 @@ class BuildControl():
 			else:
 				self.base.append(f"\toutput {self.layer_enables[i]},\n")
 			
+		self.base.append(");\n")
 
-		self.base(");\n")
-	#TODO build the operations
 	def build_control(self):
 		self.base.append(f"\tassign clk = 1'b0;\n\n")
-		for i in len(self.layer_mods):
+		for i in range(len(self.layer_mods)):
 			if(i == 0):
 				self.base.append(f"\tassign {self.layer_enables[i]} = 1'b1;\n")
 			else:
 				self.base.append(f"\tassign {self.layer_enables[i]} = 1'b0;\n")
 		
-		self.base.append("\talways begin\n")
+		self.base.append("\n\talways begin\n")
 		self.base.append("\t\tassign clk = ~clk;\n")
 		self.base.append("\t\t#100 //100ps pos to neg clk time\n")
-		self.base.append("\tend\n")
+		self.base.append("\tend\n\n")
 
 		self.base.append("\tinteger clock_cycle = 0;\n")
 		self.base.append("\talways @(negedge clk) begin\n")
 		self.base.append("\t\tclock_cycle = clock_cycle + 1;\n\n")
 		prev_count = 0
-		for i, layer in self.layer_mods:
+		for i, layer in enumerate(self.layer_mods):
 			if(i == len(self.layer_mods) - 1):
-				self.base.append(f"\t\tif(clock_cycles ^ {self.layer_mods.input_count + prev_count} == 0) begin\n")
+				self.base.append(f"\t\tif(clock_cycles ^ {layer.input_count + prev_count} == 0) begin\n")
 				self.base.append(f"\t\t\tassign {self.layer_enables[i]} = 1'b0;\n")
 				self.base.append(f"\t\tend\n")
 			else:
-				self.base.append(f"\t\tif(clock_cycles ^ {self.layer_mods.input_count + prev_count} == 0) begin\n")
+				self.base.append(f"\t\tif(clock_cycles ^ {layer.input_count + prev_count} == 0) begin\n")
 				self.base.append(f"\t\t\tassign {self.layer_enables[i]} = 1'b0;\n")
-				self.base.append(f"\t\t\tassign {self.layer_enables[i+1]} = 1'b0;\n")
-				self.base.append(f"\t\tend\n")
-				prev_count += self.layer_mods.input_count
-		self.base.append(f"\t\tend\n")
-		self.base.append(f"endmodule\n")
+				self.base.append(f"\t\t\tassign {self.layer_enables[i+1]} = 1'b1;\n")
+				self.base.append(f"\t\tend\n\n")
+				prev_count += layer.input_count
+		self.base.append(f"\tend\n")
+		self.base.append(f"endmodule\n\n")
 		
 #Network connects all layers, implements pic_ROM, and outputs the guess
 class BuildNetwork():
@@ -379,11 +390,11 @@ class BuildNetwork():
 		for i, layer in enumerate(self.layers):
 			if(i == 0):
 				self.base.append("\tlogic clk;\n")
-				for num in len(self.layers):
+				for num in range(len(self.layers)):
 					self.base.append(f"\tlogic layer{num}_en;\n")
-				self.base.append(f"{self.control_mod.name} control(.clk(clk)")
-				for num in len(self.layers):
-					#TODO build control_mod and keep track of layer enables output names
+
+				self.base.append(f"\n\t{self.control_mod.name} con_mod(.clk(clk)")
+				for num in range(len(self.layers)):
 					self.base.append(f", .{self.control_mod.layer_enables[num]}(layer{num}_en)")
 				self.base.append(");\n\n")
 

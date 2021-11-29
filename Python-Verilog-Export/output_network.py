@@ -49,7 +49,9 @@ for i in range(num_of_layers):
 
 	layers.append(BuildLayer(f"layer_{i}", data_size, input_amount[i], layer_nodes[i], layer_weights[i], layer_bias[i][0]))
 
-network = BuildNetwork(data_size, len(px_rom_arr), px_rom_arr[pic_to_use], layers)
+control = BuildControl("control", layers)
+
+network = BuildNetwork(data_size, len(px_rom_arr), control, px_rom_arr[pic_to_use], layers)
 
 file_output = open("Network.sv", "w")
 write_to_file(ha.base, file_output)
@@ -73,6 +75,8 @@ for i in range(num_of_layers):
 		write_to_file(node_mod.base, file_output)
 	
 	write_to_file(layers[i].base, file_output)
+
+write_to_file(control.base, file_output)
 
 write_to_file(network.base, file_output)
 
