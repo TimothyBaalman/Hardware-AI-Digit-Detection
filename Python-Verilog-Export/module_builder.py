@@ -175,24 +175,28 @@ class ActivationFuncModuleBuilder():
 	def __init__(self, name, data_size):
 		self.name = name
 		self.data_size = data_size
+		self.input_name = ""
+		self.output_name = ""
 
 		self.base = []
 		if(name == 'relu'):
 			self.build_relu()
 	
 	def build_relu(self):
+		self.input_name = "r_in"
+		self.output_name = "r_out"
+
 		self.base.append("module relu(\n")
-		self.base.append(f"\tinput [{self.data_size-1}:0] r_in,\n")
-		self.base.append(f"\toutput [{self.data_size-1}:0] r_out\n")
+		self.base.append(f"\tinput [{self.data_size-1}:0] {self.input_name},\n")
+		self.base.append(f"\toutput [{self.data_size-1}:0] {self.output_name}\n")
 		self.base.append(");\n")
 		self.base.append(f"\tassign r_out = (r_in[{self.data_size-1}] == 0) ? r_in : {self.data_size}'b0;\n")
 		self.base.append("endmodule\n\n")
 
 class BuildNode():
-	def __init__(self, name, node_index, ff_module, adder_module, mult_module, data_size, activation_function_module, input_amount):
+	def __init__(self, name, node_index, adder_module, mult_module, data_size, activation_function_module, input_amount):
 		self.name = name 
 		self.node_index = node_index
-		self.ff_mod = ff_module
 		self.adder_module = adder_module
 		self.mult_module = mult_module
 		self.data_size = data_size
@@ -213,7 +217,39 @@ class BuildNode():
 		self.base.append(f");\n")
 
 	def implement_summation(self):
-		
+		self.base.append(f"\tlogic [{self.data_size - 1}:0] sum_res = 32'b0;\n")
+		self.base.append(f"\tlogic carry = 1'b0;\n\n")
+
+		self.base.append(f"\tlogic [{self.data_size - 1}:0] mult_res;\n\n")
+
+		self.base.append(f"\tinteger i = 0; //change to logic [31:0] for syn\n")
+		self.base.append(f"\talways @(posedge clk) begin\n")
+		self.base.append(f"\t\tif(enabled) begin\n")
+		self.base.append(f"\t\t\t{self.mult_module.name} mul(.{self.mult_module.input_names[0]}(input_data[i]), .{self.mult_module.input_names[1]}(weights[i]), .{self.mult_module.output_names[0]}(mult_res));\n")
+		self.base.append(f"\t\t\ti = i + 1;\n")
+		self.base.append(f"\t\tend\n")
+		self.base.append(f"\tend\n\n")
+
+		self.base.append(f"\talways @(negedge clk) begin\n")
+		self.base.append(f"\t\tif(enabled) begin\n")
+		self.base.append(f"\t\t\t{self.adder_module.name} adder0(\n")
+		self.base.append(f"\t\t\t\t.{self.adder_module.input_names[0]}(sum_res), .{self.adder_module.input_names[1]}(mult_res), .{self.adder_module.input_names[2]}(carry)\n")
+		self.base.append(f"\t\t\t\t.{self.adder_module.output_names[0]}(sum_res), .{self.adder_module.output_names[1]}(carry)\n")
+		self.base.append(f"\t\t\t);\n")
+		self.base.append(f"\t\tend\n")
+		self.base.append(f"\tend\n\n")
+
+		self.base.append(f"\talways @(negedge enabled) begin\n")
+		self.base.append(f"\t\t{self.adder_module.name} adder1(\n")
+		self.base.append(f"\t\t\t.{self.adder_module.input_names[0]}(sum_res), .{self.adder_module.input_names[1]}(bias), .{self.adder_module.input_names[2]}(carry)\n")
+		self.base.append(f"\t\t\t.{self.adder_module.output_names[0]}(sum_res), .{self.adder_module.output_names[1]}(carry)\n")
+		self.base.append(f"\t\t);\n")
+		self.base.append(f"\talways @(negedge enabled) begin\n")
+		self.base.append(f"\t\t{self.activation_function_module.name} act_func(.{self.activation_function_module.input_name}(sum_res), .{self.activation_function_module.output_name}(sum_res));\n")
+		self.base.append(f"\tend\n\n")
+
+		self.base.append(f"endmodule\n")
+
 		# self.base.append(f"\tlogic [{self.data_size - 1}:0] to_sum [{self.input_amount + 1}]; //extra to add in bias\n")
 		# #Use logic we have in test_rom.sv to complete this taking
 		# self.base.append("\tinteger i;\n")
@@ -275,17 +311,51 @@ class BuildControl():
 		self.layer_enables = []
 		self.base = []
 		self.build_base()
-	#TODO build the operations
+	
 	def build_base(self):
 		self.base.append("module control(\n")
 		self.base.append("\toutput clk,\n")
 		for i in len(self.layer_mods):
-			if(i == len(self.layer_mods) - 1):
-				self.base.append(f"\toutput layer{i}_en\n")
-			else:
-				self.base.append(f"\toutput layer{i}_en,\n")
 			self.layer_enables.append(f"layer{i}_en")
+
+			if(i == len(self.layer_mods) - 1):
+				self.base.append(f"\toutput {self.layer_enables[i]}\n")
+			else:
+				self.base.append(f"\toutput {self.layer_enables[i]},\n")
+			
+
 		self.base(");\n")
+	#TODO build the operations
+	def build_control(self):
+		self.base.append(f"\tassign clk = 1'b0;\n\n")
+		for i in len(self.layer_mods):
+			if(i == 0):
+				self.base.append(f"\tassign {self.layer_enables[i]} = 1'b1;\n")
+			else:
+				self.base.append(f"\tassign {self.layer_enables[i]} = 1'b0;\n")
+		
+		self.base.append("\talways begin\n")
+		self.base.append("\t\tassign clk = ~clk;\n")
+		self.base.append("\t\t#100 //100ps pos to neg clk time\n")
+		self.base.append("\tend\n")
+
+		self.base.append("\tinteger clock_cycle = 0;\n")
+		self.base.append("\talways @(negedge clk) begin\n")
+		self.base.append("\t\tclock_cycle = clock_cycle + 1;\n\n")
+		prev_count = 0
+		for i, layer in self.layer_mods:
+			if(i == len(self.layer_mods) - 1):
+				self.base.append(f"\t\tif(clock_cycles ^ {self.layer_mods.input_count + prev_count} == 0) begin\n")
+				self.base.append(f"\t\t\tassign {self.layer_enables[i]} = 1'b0;\n")
+				self.base.append(f"\t\tend\n")
+			else:
+				self.base.append(f"\t\tif(clock_cycles ^ {self.layer_mods.input_count + prev_count} == 0) begin\n")
+				self.base.append(f"\t\t\tassign {self.layer_enables[i]} = 1'b0;\n")
+				self.base.append(f"\t\t\tassign {self.layer_enables[i+1]} = 1'b0;\n")
+				self.base.append(f"\t\tend\n")
+				prev_count += self.layer_mods.input_count
+		self.base.append(f"\t\tend\n")
+		self.base.append(f"endmodule\n")
 		
 #Network connects all layers, implements pic_ROM, and outputs the guess
 class BuildNetwork():
