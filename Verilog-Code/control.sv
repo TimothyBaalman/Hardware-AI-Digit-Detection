@@ -8,13 +8,12 @@ module control(
 	assign layer0_en = 1'b1; 
 	assign layer1_en = 1'b0;
 	
-	interger clock_cycle; 
-	
 	always begin
-		clk = ~clk;
+		assign clk = ~clk;
 		#100
 	end
 	
+	integer clock_cycle = 0; 
 	always @(negedge clk) begin
 		clock_cycle = clock_cycle + 1;
 

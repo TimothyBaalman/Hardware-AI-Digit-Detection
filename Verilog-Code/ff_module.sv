@@ -34,12 +34,12 @@ module layer0_node0(
 
 	always @(negedge clk) begin
 		if(enabled) begin
-			fa_32b adder(.a(sum_res), .b(mult_res), .c_in(carry), .s(sum_res), .c_out(carry));	
+			fa_32b adder0(.a(sum_res), .b(mult_res), .c_in(carry), .s(sum_res), .c_out(carry));	
 		end
 	end
 
 	always @(negedge enabled) begin
-		fa_32b adder(.a(sum_res), .b(bias), .c_in(carry), .s(sum_res), .c_out(carry));
+		fa_32b adder1(.a(sum_res), .b(bias), .c_in(carry), .s(sum_res), .c_out(carry));
 		relu act_func(.r_in(sum_res), .r_out(sum_res) .clk(clk));
 	end
 
