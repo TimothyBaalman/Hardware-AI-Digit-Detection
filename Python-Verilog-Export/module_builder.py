@@ -1,3 +1,4 @@
+from _typeshed import Self
 import json
 import math
 from full_adder_n_bit import fa_operations
@@ -185,12 +186,13 @@ class ActivationFuncModuleBuilder():
 		self.base.append(f"\toutput [{self.data_size-1}:0] r_out\n")
 		self.base.append(");\n")
 		self.base.append(f"\tassign r_out = (r_in[{self.data_size-1}] == 0) ? r_in : {self.data_size}'b0;\n")
-		self.base.append("endmodule\n")
+		self.base.append("endmodule\n\n")
 
 class BuildNode():
-	def __init__(self, name, node_index, adder_module, mult_module, data_size, activation_function_module, input_amount):
+	def __init__(self, name, node_index, ff_module, adder_module, mult_module, data_size, activation_function_module, input_amount):
 		self.name = name 
 		self.node_index = node_index
+		self.ff_mod = ff_module
 		self.adder_module = adder_module
 		self.mult_module = mult_module
 		self.data_size = data_size
@@ -206,29 +208,30 @@ class BuildNode():
 		self.base.append(f"\tinput [{self.data_size - 1}:0] input_data [{self.input_amount }],\n")
 		self.base.append(f"\tinput [{self.data_size - 1}:0] weights [{self.input_amount }],\n")
 		self.base.append(f"\tinput [{self.data_size - 1}:0] bias,\n")
+		self.base.append(f"\tinput clk, enabled,\n")
 		self.base.append(f"\toutput [{self.data_size - 1}:0] node_res\n")
 		self.base.append(f");\n")
 
 	def implement_summation(self):
-		self.base.append(f"\tlogic [{self.data_size - 1}:0] to_sum [{self.input_amount + 1}]; //extra to add in bias\n")
-		#Use logic we have in test_rom.sv to complete this taking
-		for i in range(self.input_amount):
-			#TODO use the mult module's inputs
-			self.base.append(f"\n\t{self.mult_module.name} mul{i}(.x(input_data[{i}]), .y(weights[{i}]), .m_out(to_sum[{i}]));\n")
-		self.base.append(f"\n\tassign to_sum[{self.input_amount}] = bias;\n\n")
-		self.base.append(f"\tlogic carry [{self.input_amount + 1}];\n")
-		self.base.append(f"\tlogic [{self.data_size - 1}:0] sum_steps [{self.input_amount}];\n\n")
-		#adder loop
-		self.base.append(f"\t{self.adder_module.name} adder0(\n\t\t.a(to_sum[0]), .b(to_sum[1]), .c_in(carry[0]), \n\t\t.s(sum_steps[0]), .c_out(carry[1])\n\t);\n")
-		for i in range(self.input_amount):
-			#TODO use the adder module's inputs
-			self.base.append(f"\t{self.adder_module.name} adder{i+1}(\n")
-			self.base.append(f"\t\t.a(sum_steps[{i}]), .b(to_sum[{i+2}]), .c_in(carry[{i+1}]),\n")
-			self.base.append(f"\t\t.s(sum_steps[{i+1}]), .c_out(carry[{i+2}])\n")
-			self.base.append("\t);\n")
-		self.base.append(f"\t{self.activation_function_module.name} act_func(.r_in(sum_steps[{self.input_amount - 1}]), .r_out(node_res));\n")
+		
+		# self.base.append(f"\tlogic [{self.data_size - 1}:0] to_sum [{self.input_amount + 1}]; //extra to add in bias\n")
+		# #Use logic we have in test_rom.sv to complete this taking
+		# self.base.append("\tinteger i;\n")
+		# self.base.append(f"\tfor(i = 0; i < {self.input_amount}; i = i + 1) begin\n")
+		# self.base.append(f"\t\t{self.mult_module.name} mul(.x(input_data[i]), .y(weights[i]), .m_out(to_sum[i]));\n\tend\n")
+		# self.base.append(f"\n\tassign to_sum[{self.input_amount}] = bias;\n\n")
+		# self.base.append(f"\tlogic carry [{self.input_amount + 1}];\n")
+		# self.base.append(f"\tlogic [{self.data_size - 1}:0] sum_steps [{self.input_amount}];\n\n")
+		# #adder loop
+		# self.base.append(f"\t{self.adder_module.name} adder0(\n\t\t.a(to_sum[0]), .b(to_sum[1]), .c_in(carry[0]), \n\t\t.s(sum_steps[0]), .c_out(carry[1])\n\t);\n")
+		# for i in range(self.input_amount):
+		# 	#TODO use the adder module's inputs
+		# 	self.base.append(f"\t{self.adder_module.name} adder{i+1}(\n")
+		# 	self.base.append(f"\t\t.a(sum_steps[{i}]), .b(to_sum[{i+2}]), .c_in(carry[{i+1}]),\n")
+		# 	self.base.append(f"\t\t.s(sum_steps[{i+1}]), .c_out(carry[{i+2}])\n")
+		# 	self.base.append("\t);\n")
+		# self.base.append(f"\t{self.activation_function_module.name} act_func(.r_in(sum_steps[{self.input_amount - 1}]), .r_out(node_res));\n")
 		self.base.append(f"endmodule //{self.name}\n\n")
-
 
 # Layer deals with implementing the nodes, providing connection to their needed input, and combining their output.
 #	it will also implement the need weight and bias rom
@@ -249,6 +252,7 @@ class BuildLayer():
 	def build_base(self):
 		self.base.append(f"module {self.name}(\n")
 		self.base.append(f"\tinput [{self.data_size - 1}:0] input_data [{self.input_count}],\n")
+		self.base.append(f"\tinput clk, enabled,\n")
 		self.base.append(f"\toutput [{self.data_size - 1}:0] data [{self.node_count}]\n")
 		self.base.append(f");\n\n")
 
@@ -260,17 +264,35 @@ class BuildLayer():
 		for i, node in enumerate(self.nodes):
 			self.base.append(f"\tlogic [{self.data_size - 1}:0] weights_{i} [{self.input_count}];\n")
 			self.base.append(f"\t{self.weight_mods[i].name} weight_rom_{i}(.data(weights_{i}));\n")
-			self.base.append(f"\t{node.name} node_{i}(.input_data(input_data), .weights(weights_{i}), .bias(bias[{i}]), .node_res(data[{i}]));\n\n")
+			self.base.append(f"\t{node.name} node_{i}(.input_data(input_data), .weights(weights_{i}), .bias(bias[{i}]), .clk(clk), .enabled(enabled), .node_res(data[{i}]));\n\n")
 			
 		# self.base.append(f"\tassign data = node_data;\n")
 		self.base.append(f"endmodule //{self.name}\n\n")
 		
-
+class BuildControl():
+	def __init__(self, layer_modules):
+		self.layer_mods = layer_modules
+		self.layer_enables = []
+		self.base = []
+		self.build_base()
+	#TODO build the operations
+	def build_base(self):
+		self.base.append("module control(\n")
+		self.base.append("\toutput clk,\n")
+		for i in len(self.layer_mods):
+			if(i == len(self.layer_mods) - 1):
+				self.base.append(f"\toutput layer{i}_en\n")
+			else:
+				self.base.append(f"\toutput layer{i}_en,\n")
+			self.layer_enables.append(f"layer{i}_en")
+		self.base(");\n")
+		
 #Network connects all layers, implements pic_ROM, and outputs the guess
 class BuildNetwork():
-	def __init__(self, data_size, output_amount, px_module, layer_modules):
+	def __init__(self, data_size, output_amount, control_module, px_module, layer_modules):
 		self.data_size = data_size
 		self.output_amount = output_amount
+		self.control_mod = control_module
 		self.px_mod = px_module
 		self.layers = layer_modules
 		self.layer_count = len(layer_modules)
@@ -286,24 +308,33 @@ class BuildNetwork():
 	def connect_layers(self):
 		for i, layer in enumerate(self.layers):
 			if(i == 0):
+				self.base.append("\tlogic clk;\n")
+				for num in len(self.layers):
+					self.base.append(f"\tlogic layer{num}_en;\n")
+				self.base.append(f"{self.control_mod.name} control(.clk(clk)")
+				for num in len(self.layers):
+					#TODO build control_mod and keep track of layer enables output names
+					self.base.append(f", .{self.control_mod.layer_enables[num]}(layer{num}_en)")
+				self.base.append(");\n\n")
+
 				self.base.append(f"\tlogic [{self.data_size - 1}:0] px_data [{layer.input_count}];\n")
 				self.base.append(f"\t{self.px_mod.name} pixels(.data(px_data));\n\n")
+
+
 				self.base.append(f"\tlogic [{self.data_size - 1}:0] layer_data_{i} [{layer.node_count}];\n")
-				self.base.append(f"\t{layer.name} layer_{i}(.input_data(px_data), .data(layer_data_{i}));\n\n")
+				self.base.append(f"\t{layer.name} lay{i}(.input_data(px_data), .clk(clk), .enabled(layer{i}_en), .data(layer_data_{i}));\n\n")
 	
 			else:
 				self.base.append(f"\tlogic [{self.data_size - 1}:0] layer_data_{i} [{layer.node_count}];\n")
-				self.base.append(f"\t{layer.name} layer_{i}(.input_data(layer_data_{i-1}), .data(layer_data_{i}));\n\n")
+				self.base.append(f"\t{layer.name} lay{i}(.input_data(layer_data_{i-1}), .clk(clk), .enabled(layer{i}_en), .data(layer_data_{i}));\n\n")
 
 		#TODO implement max function? Change output guess to not be an array of 32 bit vals
 		self.base.append(f"\tassign guess = layer_data_{len(self.layers)- 1};\n\n")
 		self.base.append("endmodule // Network\n")
 
-
 def output_network_testbench(output_count):
 	file = open("Network_tb.sv", "w")
 	file.write(f"module tb;\n\tlogic [31:0] out [{output_count}];\n\tNetwork net(.guess(out));\nendmodule")
-
 
 def output_network_do():
 	file = open("Network.do", "w")
