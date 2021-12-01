@@ -5284,6 +5284,15 @@ module pixel_rom_for_1(
 	assign data = mem; 
 endmodule // for pixel_rom_for_1
 
+module layer0_bias_rom(
+	output logic [31:0] data [64]// 32 bit address
+);
+	logic [31:0] mem [64]; // 64 inputs to the node
+	initial begin
+		 $readmemb("C:/Users/xbk1l/Documents/Educational/Fall 2021/DIC/Hardware-AI-Digit-Detection/Python-Parsing/layer0_bias.dat", mem);
+	end
+	assign data = mem; 
+endmodule // for layer0_bias_rom
 
 module layer0_node_0(
 	input logic [31:0] input_data [784],
@@ -5345,3 +5354,57 @@ module layer0_node_0(
 	end
 
 endmodule //layer0_node_0
+
+module layer_0(
+	input logic [31:0] input_data [784],
+	input logic clk, enabled,
+	output logic [31:0] data [64]
+);
+
+	logic [31:0] bias [64];
+	layer0_bias_rom bias_rom(.data(bias));
+
+	logic [31:0] weights_0 [784];
+	layer0_weight_0_rom weight_rom_0(.data(weights_0));
+	layer0_node_0 node_0(.input_data(input_data), .weights(weights_0), .bias(bias[0]), .clk(clk), .enabled(enabled), .node_res(data[0]));
+
+endmodule //layer_0
+
+module control(
+	output logic clk,
+	output logic layer0_en
+);
+
+	initial begin
+		clk = 1'b0;
+
+		layer0_en = 1'b1;
+
+		forever begin
+			#10 clk = ~clk;
+		end
+	end
+
+	integer clock_cycles = 0;
+	always @(negedge clk) begin
+		if(clock_cycles == 784) begin
+			layer0_en = 1'b0;
+		end
+		clock_cycles = clock_cycles + 1;
+
+	end
+endmodule //control
+
+module test();
+	logic clk;
+	logic layer0_en;
+
+	control con_mod(.clk(clk), .layer0_en(layer0_en));
+
+	logic [31:0] px_data [784];
+	pixel_rom_for_0 pixels(.data(px_data));
+
+	logic [31:0] layer_data_0 [64];
+	layer_0 lay0(.input_data(px_data), .clk(clk), .enabled(layer0_en), .data(layer_data_0));
+
+endmodule
