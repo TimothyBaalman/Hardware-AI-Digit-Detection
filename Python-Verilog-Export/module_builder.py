@@ -193,8 +193,10 @@ class ActivationFuncModuleBuilder():
 		self.base.append("endmodule\n\n")
 
 class BuildNode():
-	def __init__(self, name, node_index, adder_module, mult_module, data_size, activation_function_module, input_amount):
+	def __init__(self, name, amt_layers, current_layer, node_index, adder_module, mult_module, data_size, activation_function_module, input_amount):
 		self.name = name 
+		self.amt_layers = amt_layers
+		self.current_layer = current_layer
 		self.node_index = node_index
 		self.adder_module = adder_module
 		self.mult_module = mult_module
@@ -221,21 +223,10 @@ class BuildNode():
 		self.base.append(f"\t//group inputs\n")
 		self.base.append(f"\tassign grp_inputs[0:{self.input_amount - 1}] = input_data[0:{self.input_amount - 1}];\n")
 		self.base.append(f"\tassign grp_inputs[{self.input_amount}] = bias;\n\n")
-
-		# for i in range(self.input_amount + 1):
-		# 	if(i == self.input_amount):
-		# 		self.base.append(f"\tassign grp_inputs[{i}] = bias;\n\n")
-		# 	else:
-		# 		self.base.append(f"\tassign grp_inputs[{i}] = input_data[{i}];\n")
 		
 		self.base.append(f"\t//equalize weights\n")
 		self.base.append(f"\tassign eqlz_weights[0:{self.input_amount - 1}] = weights[0:{self.input_amount - 1}];\n")
 		self.base.append(f"\tassign eqlz_weights[{self.input_amount}] = {self.data_size}'b01; // bias * 1\n\n")
-		# for i in range(self.input_amount + 1):
-		# 	if(i == self.input_amount):
-		# 		self.base.append(f"\tassign eqlz_weights[{i}] = 32'b01; // bias * 1\n\n")
-		# 	else:
-		# 		self.base.append(f"\tassign eqlz_weights[{i}] = weights[{i}];\n")
 		
 		self.base.append(f"\tlogic [{self.data_size - 1}:0] mult_res;\n\n")
 
@@ -282,12 +273,15 @@ class BuildNode():
 		self.base.append(f"\t\tend\n")
 		self.base.append(f"\tend\n\n")
 
-		act_in_name = self.activation_function_module.input_name
-		self.base.append(f"\treg [{self.data_size - 1}:0] act_{act_in_name};\n")
-		self.base.append(f"\t{self.activation_function_module.name} act_func(.{act_in_name}(act_{act_in_name}), .{self.activation_function_module.output_name}(node_res));\n")
-		self.base.append(f"\talways @(negedge enabled) begin\n")
-		self.base.append(f"\t\tact_{act_in_name} = sum_res;\n")
-		self.base.append(f"\tend\n\n")
+		if(self.current_layer == self.amt_layers - 1):
+			act_in_name = self.activation_function_module.input_name
+			self.base.append(f"\treg [{self.data_size - 1}:0] act_{act_in_name};\n")
+			self.base.append(f"\t{self.activation_function_module.name} act_func(.{act_in_name}(act_{act_in_name}), .{self.activation_function_module.output_name}(node_res));\n")
+			self.base.append(f"\talways @(negedge enabled) begin\n")
+			self.base.append(f"\t\tact_{act_in_name} = sum_res;\n")
+			self.base.append(f"\tend\n\n")
+		else:
+			self.base.append(f"\tassign node_res = sum_res;\n")
 
 		self.base.append(f"endmodule //{self.name}\n\n")
 

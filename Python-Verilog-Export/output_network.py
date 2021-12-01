@@ -48,7 +48,7 @@ for i in range(num_of_layers):
 		weight_file = f"{data_folder}/layer{i}_weight_{j}.dat"
 		layer_weights[i].append(RomModuleBuilder(f"layer{i}_weight_{j}_rom", data_size, input_amount[i], weight_file))
 
-		layer_nodes[i].append(BuildNode(f"layer{i}_node_{j}", j, fa_32b, mult_2c_32b, data_size, relu, input_amount[i]))
+		layer_nodes[i].append(BuildNode(f"layer{i}_node_{j}", num_of_layers, i, j, fa_32b, mult_2c_32b, data_size, relu, input_amount[i]))
 
 	layers.append(BuildLayer(f"layer_{i}", data_size, input_amount[i], layer_nodes[i], layer_weights[i], layer_bias[i][0]))
 
