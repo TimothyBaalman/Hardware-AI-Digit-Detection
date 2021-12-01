@@ -6062,7 +6062,12 @@ module layer0_node_0(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6118,7 +6123,12 @@ module layer0_node_1(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6174,7 +6184,12 @@ module layer0_node_2(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6230,7 +6245,12 @@ module layer0_node_3(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6286,7 +6306,12 @@ module layer0_node_4(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6342,7 +6367,12 @@ module layer0_node_5(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6398,7 +6428,12 @@ module layer0_node_6(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6454,7 +6489,12 @@ module layer0_node_7(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6510,7 +6550,12 @@ module layer0_node_8(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6566,7 +6611,12 @@ module layer0_node_9(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6622,7 +6672,12 @@ module layer0_node_10(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6678,7 +6733,12 @@ module layer0_node_11(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6734,7 +6794,12 @@ module layer0_node_12(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6790,7 +6855,12 @@ module layer0_node_13(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6846,7 +6916,12 @@ module layer0_node_14(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6902,7 +6977,12 @@ module layer0_node_15(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -6958,7 +7038,12 @@ module layer0_node_16(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7014,7 +7099,12 @@ module layer0_node_17(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7070,7 +7160,12 @@ module layer0_node_18(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7126,7 +7221,12 @@ module layer0_node_19(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7182,7 +7282,12 @@ module layer0_node_20(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7238,7 +7343,12 @@ module layer0_node_21(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7294,7 +7404,12 @@ module layer0_node_22(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7350,7 +7465,12 @@ module layer0_node_23(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7406,7 +7526,12 @@ module layer0_node_24(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7462,7 +7587,12 @@ module layer0_node_25(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7518,7 +7648,12 @@ module layer0_node_26(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7574,7 +7709,12 @@ module layer0_node_27(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7630,7 +7770,12 @@ module layer0_node_28(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7686,7 +7831,12 @@ module layer0_node_29(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7742,7 +7892,12 @@ module layer0_node_30(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7798,7 +7953,12 @@ module layer0_node_31(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7854,7 +8014,12 @@ module layer0_node_32(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7910,7 +8075,12 @@ module layer0_node_33(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -7966,7 +8136,12 @@ module layer0_node_34(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8022,7 +8197,12 @@ module layer0_node_35(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8078,7 +8258,12 @@ module layer0_node_36(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8134,7 +8319,12 @@ module layer0_node_37(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8190,7 +8380,12 @@ module layer0_node_38(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8246,7 +8441,12 @@ module layer0_node_39(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8302,7 +8502,12 @@ module layer0_node_40(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8358,7 +8563,12 @@ module layer0_node_41(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8414,7 +8624,12 @@ module layer0_node_42(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8470,7 +8685,12 @@ module layer0_node_43(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8526,7 +8746,12 @@ module layer0_node_44(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8582,7 +8807,12 @@ module layer0_node_45(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8638,7 +8868,12 @@ module layer0_node_46(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8694,7 +8929,12 @@ module layer0_node_47(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8750,7 +8990,12 @@ module layer0_node_48(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8806,7 +9051,12 @@ module layer0_node_49(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8862,7 +9112,12 @@ module layer0_node_50(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8918,7 +9173,12 @@ module layer0_node_51(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -8974,7 +9234,12 @@ module layer0_node_52(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -9030,7 +9295,12 @@ module layer0_node_53(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -9086,7 +9356,12 @@ module layer0_node_54(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -9142,7 +9417,12 @@ module layer0_node_55(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -9198,7 +9478,12 @@ module layer0_node_56(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -9254,7 +9539,12 @@ module layer0_node_57(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -9310,7 +9600,12 @@ module layer0_node_58(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -9366,7 +9661,12 @@ module layer0_node_59(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -9422,7 +9722,12 @@ module layer0_node_60(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -9478,7 +9783,12 @@ module layer0_node_61(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -9534,7 +9844,12 @@ module layer0_node_62(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -9590,7 +9905,12 @@ module layer0_node_63(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -10023,7 +10343,12 @@ module layer1_node_0(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -10079,7 +10404,12 @@ module layer1_node_1(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -10135,7 +10465,12 @@ module layer1_node_2(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -10191,7 +10526,12 @@ module layer1_node_3(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -10247,7 +10587,12 @@ module layer1_node_4(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -10303,7 +10648,12 @@ module layer1_node_5(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -10359,7 +10709,12 @@ module layer1_node_6(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -10415,7 +10770,12 @@ module layer1_node_7(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -10471,7 +10831,12 @@ module layer1_node_8(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;
@@ -10527,7 +10892,12 @@ module layer1_node_9(
 		.s(sum_res), .c_out(carry)
 	);
 	always @(negedge clk) begin
-		if(enabled) begin
+		if(enabled && i == 1) begin
+			add_a = 32'b0;
+			add_b = mult_res;
+			add_c_in = 32'b0;
+		end
+		else if(enabled) begin
 			add_a = sum_res;
 			add_b = mult_res;
 			add_c_in = carry;

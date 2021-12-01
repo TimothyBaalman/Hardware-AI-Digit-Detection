@@ -270,7 +270,12 @@ class BuildNode():
 		self.base.append(f"\t\t.{self.adder_module.output_names[0]}(sum_res), .{self.adder_module.output_names[1]}(carry)\n")
 		self.base.append(f"\t);\n")
 		self.base.append(f"\talways @(negedge clk) begin\n")
-		self.base.append(f"\t\tif(enabled) begin\n")
+		self.base.append(f"\t\tif(enabled && i == 1) begin\n")
+		self.base.append(f"\t\t\tadd_{add_a_name} = {self.data_size}'b0;\n")
+		self.base.append(f"\t\t\tadd_{add_b_name} = mult_res;\n")
+		self.base.append(f"\t\t\tadd_{add_c_in_name} = {self.data_size}'b0;\n")
+		self.base.append(f"\t\tend\n")
+		self.base.append(f"\t\telse if(enabled) begin\n")
 		self.base.append(f"\t\t\tadd_{add_a_name} = sum_res;\n")
 		self.base.append(f"\t\t\tadd_{add_b_name} = mult_res;\n")
 		self.base.append(f"\t\t\tadd_{add_c_in_name} = carry;\n")
@@ -426,6 +431,7 @@ def output_network_testbench(output_count):
 	file = open("Network_tb.sv", "w")
 	file.write(f"module tb;\n\tlogic [31:0] out [{output_count}];\n\tNetwork net(.guess(out));\nendmodule")
 
+#TODO Make waveforms pretty
 def output_network_do():
 	file = open("Network.do", "w")
 	
@@ -453,6 +459,6 @@ def output_network_do():
 	output.append("configure wave -rowmargin 4\n")
 	output.append("configure wave -childrowmargin 2\n\n")
 
-	output.append("-- Run the Simulation\nrun 1200ns\n")
+	output.append(f"-- Run the Simulation\nrun {10*784*784 + 10*64*64 }ns\n")
 
 	write_to_file(output, file)
