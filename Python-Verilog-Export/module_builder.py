@@ -95,9 +95,9 @@ class BasicModuleBuilder():
 		for bit in matching_bits["inputs"]:
 			str_out = ""
 			if(bit == 1):
-				str_out = f"   input"
+				str_out = f"   input logic"
 			else:
-				str_out = f"	input [{bit-1}:0]"
+				str_out = f"	input logic [{bit-1}:0]"
 			for in_names in matching_bits["inputs"][bit]:
 				print(in_names)
 				str_out += f" {in_names},"
@@ -109,9 +109,9 @@ class BasicModuleBuilder():
 		for out_index, bit in enumerate(matching_bits["outputs"]):
 			str_out = ""
 			if(bit == 1):
-				str_out = f"   output"
+				str_out = f"   output logic"
 			else:
-				str_out = f"	output [{bit-1}:0]"
+				str_out = f"	output logic [{bit-1}:0]"
 			for out_names in matching_bits["outputs"][bit]:
 				# on last bit on output and it's the last index of the outputs don't add comma
 				if(out_names == matching_bits["outputs"][bit][-1] and out_index == output_count - 1): #  or output_count == 1
@@ -161,7 +161,7 @@ class RomModuleBuilder():
 		self.file_path = dat_file_path
 
 		self.base = [f"module {name}(\n"]
-		self.base.append(f"\toutput [{data_size-1}:0] data [{mem_amount}]// {data_size} bit address\n")
+		self.base.append(f"\toutput logic [{data_size-1}:0] data [{mem_amount}]// {data_size} bit address\n")
 		self.base.append(f");\n")
 		self.base.append(f"\tlogic [{data_size-1}:0] mem [{mem_amount}]; // {mem_amount} inputs to the node\n")
 		self.base.append(f"\tinitial begin\n")
@@ -186,8 +186,8 @@ class ActivationFuncModuleBuilder():
 		self.output_name = "r_out"
 
 		self.base.append("module relu(\n")
-		self.base.append(f"\tinput [{self.data_size-1}:0] {self.input_name},\n")
-		self.base.append(f"\toutput [{self.data_size-1}:0] {self.output_name}\n")
+		self.base.append(f"\tinput logic [{self.data_size-1}:0] {self.input_name},\n")
+		self.base.append(f"\toutput logic [{self.data_size-1}:0] {self.output_name}\n")
 		self.base.append(");\n")
 		self.base.append(f"\tassign r_out = (r_in[{self.data_size-1}] == 0) ? r_in : {self.data_size}'b0;\n")
 		self.base.append("endmodule\n\n")
@@ -208,75 +208,82 @@ class BuildNode():
 	
 	def build_base(self):
 		self.base.append(f"module {self.name}(\n")
-		self.base.append(f"\tinput [{self.data_size - 1}:0] input_data [{self.input_amount }],\n")
-		self.base.append(f"\tinput [{self.data_size - 1}:0] weights [{self.input_amount }],\n")
-		self.base.append(f"\tinput [{self.data_size - 1}:0] bias,\n")
-		self.base.append(f"\tinput clk, enabled,\n")
-		self.base.append(f"\toutput [{self.data_size - 1}:0] node_res\n")
+		self.base.append(f"\tinput logic [{self.data_size - 1}:0] input_data [{self.input_amount }],\n")
+		self.base.append(f"\tinput logic [{self.data_size - 1}:0] weights [{self.input_amount }],\n")
+		self.base.append(f"\tinput logic [{self.data_size - 1}:0] bias,\n")
+		self.base.append(f"\tinput logic clk, enabled,\n")
+		self.base.append(f"\toutput logic [{self.data_size - 1}:0] node_res\n")
 		self.base.append(f");\n")
 
 	def implement_summation(self):
 		self.base.append(f"\tlogic [{self.data_size - 1}:0] grp_inputs [{self.input_amount + 1}];\n")
 		self.base.append(f"\tlogic [{self.data_size - 1}:0] eqlz_weights [{self.input_amount + 1}];\n\n")
 		self.base.append(f"\t//group inputs\n")
-		for i in range(self.input_amount + 1):
-			if(i == self.input_amount):
-				self.base.append(f"\tassign grp_inputs[{i}] = bias;\n\n")
-			else:
-				self.base.append(f"\tassign grp_inputs[{i}] = input_data[{i}];\n")
-		self.base.append(f"\t//equalize weights\n")
-		for i in range(self.input_amount + 1):
-			if(i == self.input_amount):
-				self.base.append(f"\tassign eqlz_weights[{i}] = 32'b01; // bias * 1\n\n")
-			else:
-				self.base.append(f"\tassign eqlz_weights[{i}] = weights[{i}];\n")
-		
-		self.base.append(f"\tlogic [{self.data_size - 1}:0] sum_res = 32'b0;\n")
-		self.base.append(f"\tlogic carry = 1'b0;\n\n")
+		self.base.append(f"\tassign grp_inputs[0:{self.input_amount - 1}] = input_data[0:{self.input_amount - 1}];\n")
+		self.base.append(f"\tassign grp_inputs[{self.input_amount}] = bias;\n\n")
 
+		# for i in range(self.input_amount + 1):
+		# 	if(i == self.input_amount):
+		# 		self.base.append(f"\tassign grp_inputs[{i}] = bias;\n\n")
+		# 	else:
+		# 		self.base.append(f"\tassign grp_inputs[{i}] = input_data[{i}];\n")
+		
+		self.base.append(f"\t//equalize weights\n")
+		self.base.append(f"\tassign eqlz_weights[0:{self.input_amount - 1}] = weights[0:{self.input_amount - 1}];\n")
+		self.base.append(f"\tassign eqlz_weights[{self.input_amount}] = {self.data_size}'b01; // bias * 1\n\n")
+		# for i in range(self.input_amount + 1):
+		# 	if(i == self.input_amount):
+		# 		self.base.append(f"\tassign eqlz_weights[{i}] = 32'b01; // bias * 1\n\n")
+		# 	else:
+		# 		self.base.append(f"\tassign eqlz_weights[{i}] = weights[{i}];\n")
+		
 		self.base.append(f"\tlogic [{self.data_size - 1}:0] mult_res;\n\n")
 
 		#There is a likely error where the inputs need to be in the second spot on the mult and the weights in the first
+		mul_x_name = self.mult_module.input_names[0]
+		mul_y_name = self.mult_module.input_names[1]
 		self.base.append(f"\tinteger i = 0; //change to logic [31:0] for syn\n")
+		self.base.append(f"\treg [{self.data_size - 1}:0] mul_{mul_x_name}, mul_{mul_y_name};\n")
+		self.base.append(f"\t{self.mult_module.name} mul(.{mul_x_name}(mul_{mul_x_name}), .{mul_y_name}(mul_{mul_y_name}), .{self.mult_module.output_names[0]}(mult_res));\n")
 		self.base.append(f"\talways @(posedge clk) begin\n")
 		self.base.append(f"\t\tif(enabled) begin\n")
-		self.base.append(f"\t\t\t{self.mult_module.name} mul(.{self.mult_module.input_names[0]}(grp_inputs[i]), .{self.mult_module.input_names[1]}(eqlz_weights[i]), .{self.mult_module.output_names[0]}(mult_res));\n")
+		self.base.append(f"\t\t\tmul_{mul_x_name} = grp_inputs[i];\n")
+		self.base.append(f"\t\t\tmul_{mul_y_name} = eqlz_weights[i];\n")
 		self.base.append(f"\t\t\ti = i + 1;\n")
 		self.base.append(f"\t\tend\n")
 		self.base.append(f"\tend\n\n")
 
+		add_a_name = self.adder_module.input_names[0]
+		add_b_name = self.adder_module.input_names[1]
+		add_c_in_name = self.adder_module.input_names[2]
+		self.base.append(f"\tlogic [{self.data_size - 1}:0] sum_res;\n")
+		self.base.append(f"\tlogic carry;\n\n")
+		# self.base.append(f"\tinitial begin\n")
+		# self.base.append(f"\t\tsum_res = {self.data_size}'b0;\n")
+		# self.base.append(f"\t\tcarry = 1'b0;\n")
+		# self.base.append(f"\tend\n")
+
+		self.base.append(f"\treg [{self.data_size - 1}:0] add_{add_a_name}, add_{add_b_name};\n")
+		self.base.append(f"\treg add_{add_c_in_name};\n")
+		self.base.append(f"\t{self.adder_module.name} adder(\n")
+		self.base.append(f"\t\t.{add_a_name}(add_{add_a_name}), .{add_b_name}(add_{add_b_name}), .{add_c_in_name}(add_{add_c_in_name}),\n")
+		self.base.append(f"\t\t.{self.adder_module.output_names[0]}(sum_res), .{self.adder_module.output_names[1]}(carry)\n")
+		self.base.append(f"\t);\n")
 		self.base.append(f"\talways @(negedge clk) begin\n")
 		self.base.append(f"\t\tif(enabled) begin\n")
-		self.base.append(f"\t\t\t{self.adder_module.name} adder0(\n")
-		self.base.append(f"\t\t\t\t.{self.adder_module.input_names[0]}(sum_res), .{self.adder_module.input_names[1]}(mult_res), .{self.adder_module.input_names[2]}(carry), \n")
-		self.base.append(f"\t\t\t\t.{self.adder_module.output_names[0]}(sum_res), .{self.adder_module.output_names[1]}(carry)\n")
-		self.base.append(f"\t\t\t);\n")
+		self.base.append(f"\t\t\tadd_{add_a_name} = sum_res;\n")
+		self.base.append(f"\t\t\tadd_{add_b_name} = mult_res;\n")
+		self.base.append(f"\t\t\tadd_{add_c_in_name} = carry;\n")
 		self.base.append(f"\t\tend\n")
 		self.base.append(f"\tend\n\n")
 
+		act_in_name = self.activation_function_module.input_name
+		self.base.append(f"\treg [{self.data_size - 1}:0] act_{act_in_name};\n")
+		self.base.append(f"\t{self.activation_function_module.name} act_func(.{act_in_name}(act_{act_in_name}), .{self.activation_function_module.output_name}(node_res));\n")
 		self.base.append(f"\talways @(negedge enabled) begin\n")
-		self.base.append(f"\t\t{self.activation_function_module.name} act_func(.{self.activation_function_module.input_name}(sum_res), .{self.activation_function_module.output_name}(sum_res));\n")
+		self.base.append(f"\t\tact_{act_in_name} = sum_res;\n")
 		self.base.append(f"\tend\n\n")
 
-		self.base.append(f"endmodule\n")
-
-		# self.base.append(f"\tlogic [{self.data_size - 1}:0] to_sum [{self.input_amount + 1}]; //extra to add in bias\n")
-		# #Use logic we have in test_rom.sv to complete this taking
-		# self.base.append("\tinteger i;\n")
-		# self.base.append(f"\tfor(i = 0; i < {self.input_amount}; i = i + 1) begin\n")
-		# self.base.append(f"\t\t{self.mult_module.name} mul(.x(input_data[i]), .y(weights[i]), .m_out(to_sum[i]));\n\tend\n")
-		# self.base.append(f"\n\tassign to_sum[{self.input_amount}] = bias;\n\n")
-		# self.base.append(f"\tlogic carry [{self.input_amount + 1}];\n")
-		# self.base.append(f"\tlogic [{self.data_size - 1}:0] sum_steps [{self.input_amount}];\n\n")
-		# #adder loop
-		# self.base.append(f"\t{self.adder_module.name} adder0(\n\t\t.a(to_sum[0]), .b(to_sum[1]), .c_in(carry[0]), \n\t\t.s(sum_steps[0]), .c_out(carry[1])\n\t);\n")
-		# for i in range(self.input_amount):
-		# 	#TODO use the adder module's inputs
-		# 	self.base.append(f"\t{self.adder_module.name} adder{i+1}(\n")
-		# 	self.base.append(f"\t\t.a(sum_steps[{i}]), .b(to_sum[{i+2}]), .c_in(carry[{i+1}]),\n")
-		# 	self.base.append(f"\t\t.s(sum_steps[{i+1}]), .c_out(carry[{i+2}])\n")
-		# 	self.base.append("\t);\n")
-		# self.base.append(f"\t{self.activation_function_module.name} act_func(.r_in(sum_steps[{self.input_amount - 1}]), .r_out(node_res));\n")
 		self.base.append(f"endmodule //{self.name}\n\n")
 
 # Layer deals with implementing the nodes, providing connection to their needed input, and combining their output.
@@ -297,9 +304,9 @@ class BuildLayer():
 	
 	def build_base(self):
 		self.base.append(f"module {self.name}(\n")
-		self.base.append(f"\tinput [{self.data_size - 1}:0] input_data [{self.input_count}],\n")
-		self.base.append(f"\tinput clk, enabled,\n")
-		self.base.append(f"\toutput [{self.data_size - 1}:0] data [{self.node_count}]\n")
+		self.base.append(f"\tinput logic [{self.data_size - 1}:0] input_data [{self.input_count}],\n")
+		self.base.append(f"\tinput logic clk, enabled,\n")
+		self.base.append(f"\toutput logic [{self.data_size - 1}:0] data [{self.node_count}]\n")
 		self.base.append(f");\n\n")
 
 	def implement_nodes(self):
@@ -326,45 +333,47 @@ class BuildControl():
 	
 	def build_base(self):
 		self.base.append(f"module {self.name}(\n")
-		self.base.append("\toutput clk,\n")
+		self.base.append("\toutput logic clk,\n")
 		for i in range(len(self.layer_mods)):
 			self.layer_enables.append(f"layer{i}_en")
 
 			if(i == len(self.layer_mods) - 1):
-				self.base.append(f"\toutput {self.layer_enables[i]}\n")
+				self.base.append(f"\toutput logic {self.layer_enables[i]}\n")
 			else:
-				self.base.append(f"\toutput {self.layer_enables[i]},\n")
+				self.base.append(f"\toutput logic {self.layer_enables[i]},\n")
 			
 		self.base.append(");\n")
 
 	def build_control(self):
-		self.base.append(f"\tassign clk = 1'b0;\n\n")
+		
+		
+		self.base.append("\n\tinitial begin\n")
+		self.base.append(f"\t\tclk = 1'b0;\n\n")
 		for i in range(len(self.layer_mods)):
 			if(i == 0):
-				self.base.append(f"\tassign {self.layer_enables[i]} = 1'b1;\n")
+				self.base.append(f"\t\t{self.layer_enables[i]} = 1'b1;\n")
 			else:
-				self.base.append(f"\tassign {self.layer_enables[i]} = 1'b0;\n")
-		
-		self.base.append("\n\talways begin\n")
-		self.base.append("\t\tassign clk = ~clk;\n")
-		self.base.append("\t\t#100 //100ps pos to neg clk time\n")
+				self.base.append(f"\t\t{self.layer_enables[i]} = 1'b0;\n")
+		self.base.append("\n\t\tforever begin\n")
+		self.base.append("\t\t\t#10 clk = ~clk;\n")
+		self.base.append("\t\tend\n")
 		self.base.append("\tend\n\n")
 
-		self.base.append("\tinteger clock_cycle = 0;\n")
+		self.base.append("\tinteger clock_cycles = 0;\n")
 		self.base.append("\talways @(negedge clk) begin\n")
-		self.base.append("\t\tclock_cycle = clock_cycle + 1;\n\n")
 		prev_count = 0
 		for i, layer in enumerate(self.layer_mods):
 			if(i == len(self.layer_mods) - 1):
-				self.base.append(f"\t\tif(clock_cycles ^ {layer.input_count + prev_count} == 0) begin\n")
-				self.base.append(f"\t\t\tassign {self.layer_enables[i]} = 1'b0;\n")
+				self.base.append(f"\t\tif(clock_cycles == {layer.input_count + prev_count}) begin\n")
+				self.base.append(f"\t\t\t{self.layer_enables[i]} = 1'b0;\n")
 				self.base.append(f"\t\tend\n")
 			else:
-				self.base.append(f"\t\tif(clock_cycles ^ {layer.input_count + prev_count} == 0) begin\n")
-				self.base.append(f"\t\t\tassign {self.layer_enables[i]} = 1'b0;\n")
-				self.base.append(f"\t\t\tassign {self.layer_enables[i+1]} = 1'b1;\n")
+				self.base.append(f"\t\tif(clock_cycles == {layer.input_count + prev_count}) begin\n")
+				self.base.append(f"\t\t\t{self.layer_enables[i]} = 1'b0;\n")
+				self.base.append(f"\t\t\t{self.layer_enables[i+1]} = 1'b1;\n")
 				self.base.append(f"\t\tend\n\n")
 				prev_count += layer.input_count
+		self.base.append("\t\tclock_cycles = clock_cycles + 1;\n\n")
 		self.base.append(f"\tend\n")
 		self.base.append(f"endmodule\n\n")
 		
@@ -383,7 +392,7 @@ class BuildNetwork():
 
 	def build_base(self):
 		self.base.append(f"module Network(\n")
-		self.base.append(f"\toutput [{self.data_size - 1}:0] guess [{self.output_amount}]\n")
+		self.base.append(f"\toutput logic [{self.data_size - 1}:0] guess [{self.output_amount}]\n")
 		self.base.append(f");\n\n")
 	
 	def connect_layers(self):
@@ -444,6 +453,6 @@ def output_network_do():
 	output.append("configure wave -rowmargin 4\n")
 	output.append("configure wave -childrowmargin 2\n\n")
 
-	output.append("-- Run the Simulation\nrun 120000ns\n")
+	output.append("-- Run the Simulation\nrun 1200ns\n")
 
 	write_to_file(output, file)

@@ -1,4 +1,5 @@
 from module_builder import *
+import os
 
 ha = BasicModuleBuilder("ha", 1, [("a", 1), ("b", 1)], [("s", 1), ("c_out", 1)])
 fa_1b = BasicModuleBuilder("fa", 1, [("a", 1), ("b", 1), ("c_in", 1)], [("s", 1), ("c_out", 1)])
@@ -23,9 +24,11 @@ num_of_layers = 2
 input_amount = [784, 64]
 node_count = [64, 10]
 
+data_folder = os.path.abspath(os.path.join(__file__, "../../Python-Parsing")).replace("\\", "/")
+
 px_rom_arr = []
 for i in range(num_pic_types):
-	filename = f"./../Python-Parsing/image_of_{i}.dat"
+	filename = f"{data_folder}/image_of_{i}.dat"
 	px_rom_arr.append(RomModuleBuilder(f"pixel_rom_for_{i}", data_size, pic_size, filename))
 
 relu = ActivationFuncModuleBuilder("relu", data_size)
@@ -40,9 +43,9 @@ for i in range(num_of_layers):
 	layer_bias.append([])
 	layer_nodes.append([])
 	
-	layer_bias[i].append(RomModuleBuilder(f"layer{i}_bias_rom", data_size, node_count[i], f"./../Python-Parsing/layer{i}_bias.dat"))
+	layer_bias[i].append(RomModuleBuilder(f"layer{i}_bias_rom", data_size, node_count[i], f"{data_folder}/layer{i}_bias.dat"))
 	for j in range(node_count[i]):
-		weight_file = f"./../Python-Parsing/layer_{i}_weight_{j}.dat"
+		weight_file = f"{data_folder}/layer{i}_weight_{j}.dat"
 		layer_weights[i].append(RomModuleBuilder(f"layer{i}_weight_{j}_rom", data_size, input_amount[i], weight_file))
 
 		layer_nodes[i].append(BuildNode(f"layer{i}_node_{j}", j, fa_32b, mult_2c_32b, data_size, relu, input_amount[i]))

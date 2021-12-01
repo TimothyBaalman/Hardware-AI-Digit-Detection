@@ -5317,6 +5317,14 @@ module relu(
 	
 endmodule
 
+module Network(
+	output [31:0] guess
+);
+	logic [31:0] px_data [784];
+	pixel_rom_0 px_val(.data(px_data));
+	
+	assign guess = 32'b0;
+endmodule
 
 // module fc_node_0(
 // 	output [31:0] node_out

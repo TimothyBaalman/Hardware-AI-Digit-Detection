@@ -32,27 +32,40 @@ module layer0_node0(
 	//...
 	assign eq_weights[784] = 32'b01; // bias * 1 
 
-	logic [31:0] sum_res = 32'b0;
-	logic carry = 1'b0;
-
 	logic [31:0] mult_res;
 
 	integer i = 0; 
+	reg [31:0] mul_x, mul_y;
+	m_2c_32b mul(.x(mul_x), .y(mul_y), .m_out(mult_res));
 	always @(posedge clk) begin
 		if(enabled) begin
-			m_2c_32b mul(.x(inputs[i]), .y(eq_weights[i]), .m_out(mult_res));
+			mul_x = inputs[i];
+			mul_y = eq_weights[i];
 			i = i + 1;
 		end
 	end
 
+	logic [31:0] sum_res = 32'b0;
+	logic carry = 1'b0;
+
+	reg [31:0] add_a, add_b;
+	reg add_c_in;
+	fa_32b adder(
+		.a(add_a), .b(add_b), .c_in(add_c_in),
+		.s(sum_res), .c_out(carry)
+	);
 	always @(negedge clk) begin
 		if(enabled) begin
-			fa_32b adder(.a(sum_res), .b(mult_res), .c_in(carry), .s(sum_res), .c_out(carry));	
+			add_a = sum_res;
+			add_b = mult_res;
+			add_c_in = carry;
 		end
 	end
 
+	reg [31:0] act_r_in;
+	relu act_func(.r_in(act_r_in), .r_out(sum_res));
 	always @(negedge enabled) begin
-		relu act_func(.r_in(sum_res), .r_out(sum_res));
+		act_r_in = sum_res;
 	end
 
 endmodule

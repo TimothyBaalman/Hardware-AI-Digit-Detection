@@ -19,18 +19,24 @@
 
 // endmodule
 
+// module tb;
+// 	reg [31:0] in;
+// 	wire [31:0] out;
+// 	relu rel(.r_in(in), .r_out(out));
+// 	initial begin
+// 		in = 32'b11111111000011111111111111111110;
+
+// 		#25
+// 		in = 32'b1;
+
+// 		#25
+// 		in = 32'b110;       
+// 	end
+
+// endmodule
+
 module tb;
-	reg [31:0] in;
-	wire [31:0] out;
-	relu rel(.r_in(in), .r_out(out));
-	initial begin
-		in = 32'b11111111000011111111111111111110;
-
-		#25
-		in = 32'b1;
-
-		#25
-		in = 32'b110;       
-	end
-
+	logic [31:0] out;
+	Network net(.guess(out));
+	
 endmodule
