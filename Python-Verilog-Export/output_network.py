@@ -17,11 +17,11 @@ mult_2c_32b = BasicModuleBuilder("m_2c", 32, [("x", 32), ("y", 32)], [("m_out", 
 
 data_size = 32
 pic_to_use = 0
-pic_size = 784
+px_count = 784
 num_pic_types = 10
 
 num_of_layers = 2
-input_amount = [784, 64]
+input_amount = [px_count, 64]
 node_count = [64, 10]
 
 data_folder = os.path.abspath(os.path.join(__file__, "../../Python-Parsing")).replace("\\", "/")
@@ -29,7 +29,7 @@ data_folder = os.path.abspath(os.path.join(__file__, "../../Python-Parsing")).re
 px_rom_arr = []
 for i in range(num_pic_types):
 	filename = f"{data_folder}/image_of_{i}.dat"
-	px_rom_arr.append(RomModuleBuilder(f"pixel_rom_for_{i}", data_size, pic_size, filename))
+	px_rom_arr.append(RomModuleBuilder(f"pixel_rom_for_{i}", data_size, px_count, filename))
 
 relu = ActivationFuncModuleBuilder("relu", data_size)
 
