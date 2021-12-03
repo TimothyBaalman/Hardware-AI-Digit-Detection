@@ -374,7 +374,7 @@ class BuildControl():
 				prev_count += layer.input_count
 		self.base.append("\t\tclock_cycles = clock_cycles + 1;\n\n")
 		self.base.append(f"\tend\n")
-		self.base.append(f"endmodule\n\n")
+		self.base.append(f"endmodule {self.name}//\n\n")
 		
 #Network connects all layers, implements pic_ROM, and outputs the guess
 class BuildNetwork():
