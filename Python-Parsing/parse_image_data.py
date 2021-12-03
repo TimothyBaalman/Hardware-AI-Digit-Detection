@@ -4,9 +4,6 @@ import torchvision.transforms as transforms
 from fixed_point_converter import float_to_signed_fixed_point
 import os
 
-address_size = 32
-integer_part_size = 17
-fractional_part_size = 14
 
 root = os.getcwd()
 
@@ -33,5 +30,5 @@ for images, target_labels in test_loader:
 
 			with open(f"{root}/image_of_{output_pic}.dat", "w") as file:
 				for pixel in img_array:
-					file.write(f"{float_to_signed_fixed_point(address_size, pixel, integer_part_size, fractional_part_size)}\n")
+					file.write(f"{float_to_signed_fixed_point(pixel)}\n")
 			output_pic += 1

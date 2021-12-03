@@ -61,11 +61,15 @@ def binary_to_2C(binary_arr):
 	bin_2c = bin_2c[::-1]
 	return bin_2c
 
-def float_to_signed_fixed_point(num_bits, num, m, n):
+def float_to_signed_fixed_point(num):
+	address_size = 32
+	integer_part_size = 17 # m 
+	fractional_part_size = 14 # n
+
 	# print(f"{num}: ")
-	num = num * 2**n
+	num = num * 2**fractional_part_size
 	# print(format(struct.unpack("!I", struct.pack("!I", int(abs(num))))[0], "032b"))
-	output = binary_conversion(int(abs(num)), num_bits)
+	output = binary_conversion(int(abs(num)), address_size)
 	overflow = output[1]
 	if(overflow):
 		print("--------------------------------\n\nOverflowed\n\n------------------------------")
@@ -84,7 +88,7 @@ def float_to_signed_fixed_point(num_bits, num, m, n):
 	for index, bit in enumerate(output):
 		if(index == 1):
 			bin_str += "_"
-		if(index == m + 1): # +1 for signed bit
+		if(index == integer_part_size + 1): # +1 for signed bit
 			bin_str += "_"
 		bin_str += str(bit)
 	

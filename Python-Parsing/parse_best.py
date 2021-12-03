@@ -17,10 +17,6 @@ root = os.getcwd()
 weight_files = ["fc_weights",  "out_weights"]
 bias_files = ["fc_bias", "out_bias"]
 
-address_size = 32
-integer_part_size = 17
-fractional_part_size = 14
-
 converted_json_oputput = {
 	"fc_weights": [],
 	"fc_bias": [],
@@ -39,11 +35,11 @@ try:
 				converted_json_oputput[weight_file].append([])
 
 				for weight in json_data[weight_file][node]:
-					converted_json_oputput[weight_file][node].append(float_to_signed_fixed_point(address_size, weight, integer_part_size, fractional_part_size))
+					converted_json_oputput[weight_file][node].append(float_to_signed_fixed_point(weight))
 
 		for bias_file in bias_files:
 			for node_bias in json_data[bias_file]:
-				converted_json_oputput[bias_file].append(float_to_signed_fixed_point(address_size, node_bias, integer_part_size, fractional_part_size))
+				converted_json_oputput[bias_file].append(float_to_signed_fixed_point(node_bias))
 	
 	json.dump(converted_json_oputput,output_json_file,indent=3) 
 except Exception as e:
