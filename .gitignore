@@ -4,6 +4,9 @@ data/
 test.json
 @_opt/
 work/
-*/transcript
-*/vsim.wlf
-*/vsim_stacktrace.vstf
+
+*transcript
+
+*vsim.wlf
+
+*vsim_stacktrace.vstf
