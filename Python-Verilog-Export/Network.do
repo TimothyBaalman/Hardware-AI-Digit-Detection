@@ -14,10 +14,9 @@ vsim -voptargs=+acc work.tb
 view list
 view wave
 
-add wave -noupdate -divider -height 32 "Guess Output"
 # Diplays All Signals recursively
+add wave -noupdate -divider -height 32 "Guess Output"
 add wave -b -r /tb/out
-
 add wave -noupdate -divider -height 32 "Control Values"
 add wave -color blue -b -r /tb/net/con_mod/clk
 add wave -color blue -b -r /tb/net/con_mod/layer0_en
