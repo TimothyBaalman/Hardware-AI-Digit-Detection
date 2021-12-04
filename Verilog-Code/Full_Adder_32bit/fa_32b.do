@@ -7,7 +7,7 @@ if [file exists work] {
 vlib work
 
 # compile source files
-vlog Network.sv Network_tb.sv
+vlog fa_32b.sv fa_32b_tb.sv
 
 # start and run simulation
 vsim -voptargs=+acc work.tb
@@ -15,13 +15,17 @@ view list
 view wave
 
 # Diplays All Signals recursively
-add wave -b -r /tb/*
+add wave -noupdate -divider -height 32 "Input/Output"
+add wave -color green -b -r /tb/a_in
+add wave -color blue -b -r /tb/b_in
+add wave -color yellow -b -r /tb/sum
+add wave -color yellow -b -r /tb/carry_out
 
 -- Set Wave Output Items
 TreeUpdate [SetDefaultTree]
-WaveRestoreZoom {0 ps} {75 ns}
+WaveRestoreZoom {0 ps} {10 ns}
 configure wave -namecolwidth 150
-configure wave -valuecolwidth 100
+configure wave -valuecolwidth 250
 configure wave -justifyvalue left
 configure wave -signalnamewidth 0
 configure wave -snapdistance 10
@@ -30,4 +34,4 @@ configure wave -rowmargin 4
 configure wave -childrowmargin 2
 
 -- Run the Simulation
-run 1ns
+run 8ns
