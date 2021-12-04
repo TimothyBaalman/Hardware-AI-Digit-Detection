@@ -34,16 +34,7 @@ def binary_to_2C(binary_arr):
 			bin_1c.append(1)
 		else:
 			bin_1c.append(0)
-
-	# str_out = ""
-	# for bit in bin_1c:
-	# 	str_out += str(bit)
-	# print(str_out)
-
-	# str_out = ""
-	# for bit in reversed(bin_1c):
-	# 	str_out += str(bit)
-	# print(str_out)
+	# print(bin_1c)
 
 	bin_2c = []
 	# ADD 1
@@ -61,11 +52,12 @@ def binary_to_2C(binary_arr):
 	bin_2c = bin_2c[::-1]
 	return bin_2c
 
-def float_to_signed_fixed_point(num):
-	address_size = 32
-	integer_part_size = 17 # m 
-	fractional_part_size = 14 # n
+address_size = 32
+integer_part_size = 17 # m 
+fractional_part_size = 14 # n
 
+def float_to_signed_fixed_point(num):
+	
 	# print(f"{num}: ")
 	num = num * 2**fractional_part_size
 	# print(format(struct.unpack("!I", struct.pack("!I", int(abs(num))))[0], "032b"))
@@ -93,3 +85,31 @@ def float_to_signed_fixed_point(num):
 		bin_str += str(bit)
 	
 	return bin_str
+
+def signed_fixed_point_to_float(bin_num):
+	if(bin_num == "x"):
+		return("Unknown")
+
+	# convert string to an int array
+	bin_array = [int(bit) for bit in bin_num]
+	# print(bin_array)
+	is_neg = False
+	if(bin_array[0] == 1):
+		bin_array = binary_to_2C(bin_array)
+		is_neg = True
+	# print(bin_array)
+
+	ouput = 0.0
+	# Sum the values of num bits
+	for index, bit in enumerate(bin_array[0:integer_part_size+1]):
+		# print(f"{index}, {bit}, 2^{(integer_part_size - index) * int(bit)} = {2**(integer_part_size - index) * int(bit) }")
+		ouput += 2**(integer_part_size - index) * int(bit) 
+		# print(f"ouput = {ouput}")
+
+	# And sum the values of fract bits
+	for index, bit in enumerate(bin_array[integer_part_size+1:integer_part_size+1+fractional_part_size]):
+		# print(f"{index}, {bit}, {2**(-1 * (index+1)) * int(bit)}")
+		ouput += 2**(-1 * (index+1)) * int(bit) 
+	if(is_neg):
+		ouput *= -1
+	return ouput
