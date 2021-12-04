@@ -483,8 +483,9 @@ def output_network_do(input_amt, clk_speed, layer_count):
 
 	output.append("view list\nview wave\n\n")
 
+	output.append("# Diplays All Signals recursively\n")
 	output.append('add wave -noupdate -divider -height 32 "Guess Output"\n')
-	output.append("# Diplays All Signals recursively\nadd wave -b -r /tb/out\n\n")
+	output.append("add wave -b -r /tb/out\n")
 	output.append('add wave -noupdate -divider -height 32 "Control Values"\n')
 	output.append("add wave -color blue -b -r /tb/net/con_mod/clk\n")
 	for i in range(layer_count):
