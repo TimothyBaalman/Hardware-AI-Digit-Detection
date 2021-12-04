@@ -273,15 +273,15 @@ class BuildNode():
 		self.base.append(f"\t\tend\n")
 		self.base.append(f"\tend\n\n")
 
-		if(self.current_layer != self.amt_layers - 1):
-			act_in_name = self.activation_function_module.input_name
-			self.base.append(f"\treg [{self.data_size - 1}:0] act_{act_in_name};\n")
-			self.base.append(f"\t{self.activation_function_module.name} act_func(.{act_in_name}(act_{act_in_name}), .{self.activation_function_module.output_name}(node_res));\n")
-			self.base.append(f"\talways @(negedge enabled) begin\n")
-			self.base.append(f"\t\tact_{act_in_name} = sum_res;\n")
-			self.base.append(f"\tend\n\n")
-		else:
-			self.base.append(f"\tassign node_res = sum_res;\n")
+		# if(self.current_layer != self.amt_layers - 1):
+		act_in_name = self.activation_function_module.input_name
+		self.base.append(f"\treg [{self.data_size - 1}:0] act_{act_in_name};\n")
+		self.base.append(f"\t{self.activation_function_module.name} act_func(.{act_in_name}(act_{act_in_name}), .{self.activation_function_module.output_name}(node_res));\n")
+		self.base.append(f"\talways @(negedge enabled) begin\n")
+		self.base.append(f"\t\tact_{act_in_name} = sum_res;\n")
+		self.base.append(f"\tend\n\n")
+		# else:
+		# 	self.base.append(f"\tassign node_res = sum_res;\n")
 
 		self.base.append(f"endmodule //{self.name}\n\n")
 
@@ -345,8 +345,6 @@ class BuildControl():
 		self.base.append(");\n")
 
 	def build_control(self):
-		
-		
 		self.base.append("\n\tinitial begin\n")
 		self.base.append(f"\t\tclk = 1'b0;\n\n")
 		for i in range(len(self.layer_mods)):
@@ -377,14 +375,56 @@ class BuildControl():
 		self.base.append(f"\tend\n")
 		self.base.append(f"endmodule // {self.name}\n\n")
 		
+class BuilSoftMax():
+	def __init__(self, name, data_size, output_amt):
+		self.name = name 
+		self.data_size = data_size 
+		self.output_amt = output_amt
+		self.base = []
+		self.build_base()
+		self.build_softmax()
+
+	def build_base(self):
+		self.base.append(f"module {self.name}(\n")
+		self.base.append(f"\tinput logic [{self.data_size - 1}:0] node_results [{self.output_amt}],\n")
+		self.base.append(f"\tinput logic clk, enabled,\n")
+		self.base.append(f"\toutput logic one_hot_out [{self.output_amt}]\n")
+		self.base.append(f");\n")
+
+	def build_softmax(self):
+		self.base.append(f"\talways @(negedge enabled, posedge clk) begin\n")
+		for i in range(self.output_amt):
+			self.base.append(f"\t\tif(node_results[{i}] == 32'b0) one_hot_out[{i}] = 1'b0;\n")
+			self.base.append(f"\t\telse begin\n")
+			for j in range(self.output_amt):
+				if(j != i and i != 0 and j == 0):
+					self.base.append(f"\t\t\tif(node_results[{i}] <= node_results[{j}]) one_hot_out[{i}] = 1'b0;\n")
+
+				elif(i == 0 and j == 0):
+					self.base.append(f"\t\t\tif(node_results[{i}] <= node_results[{i+1}]) one_hot_out[{i}] = 1'b0;\n")
+
+				elif(i == 0 and j == 1):
+					continue
+
+				elif(j != i and j != 0 ):
+					self.base.append(f"\t\t\telse if(node_results[{i}] <= node_results[{j}]) one_hot_out[{i}] = 1'b0;\n")
+			self.base.append(f"\t\t\telse one_hot_out[{i}] = 1'b1;\n")
+			
+			self.base.append(f"\t\tend\n\n")
+		
+		self.base.append(f"\tend\n")
+		self.base.append(f"endmodule //{self.name}\n\n")
+
+
 #Network connects all layers, implements pic_ROM, and outputs the guess
 class BuildNetwork():
-	def __init__(self, data_size, output_amount, control_module, px_module, layer_modules):
+	def __init__(self, data_size, output_amount, control_module, px_module, layer_modules, softmax_module):
 		self.data_size = data_size
 		self.output_amount = output_amount
 		self.control_mod = control_module
 		self.px_mod = px_module
 		self.layers = layer_modules
+		self.softmax = softmax_module
 		self.layer_count = len(layer_modules)
 		self.base = []
 		self.build_base()
@@ -392,7 +432,8 @@ class BuildNetwork():
 
 	def build_base(self):
 		self.base.append(f"module Network(\n")
-		self.base.append(f"\toutput logic [{self.data_size - 1}:0] guess [{self.output_amount}]\n")
+		# self.base.append(f"\toutput logic [{self.data_size - 1}:0] guess [{self.output_amount}]\n")
+		self.base.append(f"\toutput logic guess [{self.output_amount}]\n")
 		self.base.append(f");\n\n")
 	
 	def connect_layers(self):
@@ -419,15 +460,17 @@ class BuildNetwork():
 				self.base.append(f"\t{layer.name} lay{i}(.input_data(layer_data_{i-1}), .clk(clk), .enabled(layer{i}_en), .data(layer_data_{i}));\n\n")
 
 		#TODO implement max function? Change output guess to not be an array of 32 bit vals
-		self.base.append(f"\tassign guess = layer_data_{len(self.layers)- 1};\n\n")
+		# self.base.append(f"\tassign guess = layer_data_{len(self.layers)- 1};\n\n")
+		self.base.append(f"\t{self.softmax.name} one_hot(.node_results(layer_data_{self.layer_count - 1}), .clk(clk), .enabled(layer{self.layer_count-1}_en), .one_hot_out(guess));\n")
+		
 		self.base.append("endmodule // Network\n")
 
 def output_network_testbench(output_count):
 	file = open("Network_tb.sv", "w")
-	file.write(f"module tb;\n\tlogic [31:0] out [{output_count}];\n\tNetwork net(.guess(out));\nendmodule")
+	file.write(f"module tb;\n\tlogic out [{output_count}];\n\tNetwork net(.guess(out));\nendmodule")
 
 #TODO Make waveforms pretty
-def output_network_do(input_amt, clk_speed):
+def output_network_do(input_amt, clk_speed, layer_count):
 	file = open("Network.do", "w")
 	
 	output = ["onbreak {resume}\n\n"]
@@ -440,14 +483,20 @@ def output_network_do(input_amt, clk_speed):
 
 	output.append("view list\nview wave\n\n")
 
+	output.append('add wave -noupdate -divider -height 32 "Guess Output"\n')
 	output.append("# Diplays All Signals recursively\nadd wave -b -r /tb/out\n\n")
+	output.append('add wave -noupdate -divider -height 32 "Control Values"\n')
+	output.append("add wave -color blue -b -r /tb/net/con_mod/clk\n")
+	for i in range(layer_count):
+		output.append(f"add wave -color blue -b -r /tb/net/con_mod/layer{i}_en\n")
+
 	sys_runtime = 0
 	for i in input_amt:
 		sys_runtime += 2*clk_speed*i
 
-	output.append("-- Set Wave Output Items\n")
+	output.append("\n-- Set Wave Output Items\n")
 	output.append("TreeUpdate [SetDefaultTree]\n")
-	output.append("WaveRestoreZoom {0 ps} {1500 ns}\n")
+	output.append("WaveRestoreZoom {0 ps} {100 ns}\n")
 	output.append("configure wave -namecolwidth 225\n")
 	output.append("configure wave -valuecolwidth 260\n")
 	output.append("configure wave -justifyvalue left\n")
@@ -457,6 +506,6 @@ def output_network_do(input_amt, clk_speed):
 	output.append("configure wave -rowmargin 4\n")
 	output.append("configure wave -childrowmargin 2\n\n")
 
-	output.append(f"-- Run the Simulation\nrun {sys_runtime+clk_speed}ns\n")
+	output.append(f"-- Run the Simulation\nrun {sys_runtime+(2*clk_speed)}ns\n")
 
 	write_to_file(output, file)

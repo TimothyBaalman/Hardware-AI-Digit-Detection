@@ -10355,7 +10355,12 @@ module layer1_node_0(
 		end
 	end
 
-	assign node_res = sum_res;
+	reg [31:0] act_r_in;
+	relu act_func(.r_in(act_r_in), .r_out(node_res));
+	always @(negedge enabled) begin
+		act_r_in = sum_res;
+	end
+
 endmodule //layer1_node_0
 
 module layer1_node_1(
@@ -10411,7 +10416,12 @@ module layer1_node_1(
 		end
 	end
 
-	assign node_res = sum_res;
+	reg [31:0] act_r_in;
+	relu act_func(.r_in(act_r_in), .r_out(node_res));
+	always @(negedge enabled) begin
+		act_r_in = sum_res;
+	end
+
 endmodule //layer1_node_1
 
 module layer1_node_2(
@@ -10467,7 +10477,12 @@ module layer1_node_2(
 		end
 	end
 
-	assign node_res = sum_res;
+	reg [31:0] act_r_in;
+	relu act_func(.r_in(act_r_in), .r_out(node_res));
+	always @(negedge enabled) begin
+		act_r_in = sum_res;
+	end
+
 endmodule //layer1_node_2
 
 module layer1_node_3(
@@ -10523,7 +10538,12 @@ module layer1_node_3(
 		end
 	end
 
-	assign node_res = sum_res;
+	reg [31:0] act_r_in;
+	relu act_func(.r_in(act_r_in), .r_out(node_res));
+	always @(negedge enabled) begin
+		act_r_in = sum_res;
+	end
+
 endmodule //layer1_node_3
 
 module layer1_node_4(
@@ -10579,7 +10599,12 @@ module layer1_node_4(
 		end
 	end
 
-	assign node_res = sum_res;
+	reg [31:0] act_r_in;
+	relu act_func(.r_in(act_r_in), .r_out(node_res));
+	always @(negedge enabled) begin
+		act_r_in = sum_res;
+	end
+
 endmodule //layer1_node_4
 
 module layer1_node_5(
@@ -10635,7 +10660,12 @@ module layer1_node_5(
 		end
 	end
 
-	assign node_res = sum_res;
+	reg [31:0] act_r_in;
+	relu act_func(.r_in(act_r_in), .r_out(node_res));
+	always @(negedge enabled) begin
+		act_r_in = sum_res;
+	end
+
 endmodule //layer1_node_5
 
 module layer1_node_6(
@@ -10691,7 +10721,12 @@ module layer1_node_6(
 		end
 	end
 
-	assign node_res = sum_res;
+	reg [31:0] act_r_in;
+	relu act_func(.r_in(act_r_in), .r_out(node_res));
+	always @(negedge enabled) begin
+		act_r_in = sum_res;
+	end
+
 endmodule //layer1_node_6
 
 module layer1_node_7(
@@ -10747,7 +10782,12 @@ module layer1_node_7(
 		end
 	end
 
-	assign node_res = sum_res;
+	reg [31:0] act_r_in;
+	relu act_func(.r_in(act_r_in), .r_out(node_res));
+	always @(negedge enabled) begin
+		act_r_in = sum_res;
+	end
+
 endmodule //layer1_node_7
 
 module layer1_node_8(
@@ -10803,7 +10843,12 @@ module layer1_node_8(
 		end
 	end
 
-	assign node_res = sum_res;
+	reg [31:0] act_r_in;
+	relu act_func(.r_in(act_r_in), .r_out(node_res));
+	always @(negedge enabled) begin
+		act_r_in = sum_res;
+	end
+
 endmodule //layer1_node_8
 
 module layer1_node_9(
@@ -10859,7 +10904,12 @@ module layer1_node_9(
 		end
 	end
 
-	assign node_res = sum_res;
+	reg [31:0] act_r_in;
+	relu act_func(.r_in(act_r_in), .r_out(node_res));
+	always @(negedge enabled) begin
+		act_r_in = sum_res;
+	end
+
 endmodule //layer1_node_9
 
 module layer_1(
@@ -10945,20 +10995,157 @@ module control(
 	end
 endmodule // control
 
-// module softmax(
-// 	input logic [31:0] node_res [10],
-// 	output logic out [10]
-// );
+module softmax(
+	input logic [31:0] node_results [10],
+	input logic clk, enabled,
+	output logic one_hot_out [10]
+);
+	always @(negedge enabled, posedge clk) begin
+		if(node_results[0] == 32'b0) one_hot_out[0] = 1'b0;
+		else begin
+			if(node_results[0] <= node_results[1]) one_hot_out[0] = 1'b0;
+			else if(node_results[0] <= node_results[2]) one_hot_out[0] = 1'b0;
+			else if(node_results[0] <= node_results[3]) one_hot_out[0] = 1'b0;
+			else if(node_results[0] <= node_results[4]) one_hot_out[0] = 1'b0;
+			else if(node_results[0] <= node_results[5]) one_hot_out[0] = 1'b0;
+			else if(node_results[0] <= node_results[6]) one_hot_out[0] = 1'b0;
+			else if(node_results[0] <= node_results[7]) one_hot_out[0] = 1'b0;
+			else if(node_results[0] <= node_results[8]) one_hot_out[0] = 1'b0;
+			else if(node_results[0] <= node_results[9]) one_hot_out[0] = 1'b0;
+			else one_hot_out[0] = 1'b1;
+		end
 
-// 	logic [31:0] first_loop [10];
-// 	if(node_res[0] > node_res[1]) assign node_res[1] = 1'b0;
-	
+		if(node_results[1] == 32'b0) one_hot_out[1] = 1'b0;
+		else begin
+			if(node_results[1] <= node_results[0]) one_hot_out[1] = 1'b0;
+			else if(node_results[1] <= node_results[2]) one_hot_out[1] = 1'b0;
+			else if(node_results[1] <= node_results[3]) one_hot_out[1] = 1'b0;
+			else if(node_results[1] <= node_results[4]) one_hot_out[1] = 1'b0;
+			else if(node_results[1] <= node_results[5]) one_hot_out[1] = 1'b0;
+			else if(node_results[1] <= node_results[6]) one_hot_out[1] = 1'b0;
+			else if(node_results[1] <= node_results[7]) one_hot_out[1] = 1'b0;
+			else if(node_results[1] <= node_results[8]) one_hot_out[1] = 1'b0;
+			else if(node_results[1] <= node_results[9]) one_hot_out[1] = 1'b0;
+			else one_hot_out[1] = 1'b1;
+		end
 
+		if(node_results[2] == 32'b0) one_hot_out[2] = 1'b0;
+		else begin
+			if(node_results[2] <= node_results[0]) one_hot_out[2] = 1'b0;
+			else if(node_results[2] <= node_results[1]) one_hot_out[2] = 1'b0;
+			else if(node_results[2] <= node_results[3]) one_hot_out[2] = 1'b0;
+			else if(node_results[2] <= node_results[4]) one_hot_out[2] = 1'b0;
+			else if(node_results[2] <= node_results[5]) one_hot_out[2] = 1'b0;
+			else if(node_results[2] <= node_results[6]) one_hot_out[2] = 1'b0;
+			else if(node_results[2] <= node_results[7]) one_hot_out[2] = 1'b0;
+			else if(node_results[2] <= node_results[8]) one_hot_out[2] = 1'b0;
+			else if(node_results[2] <= node_results[9]) one_hot_out[2] = 1'b0;
+			else one_hot_out[2] = 1'b1;
+		end
 
-// endmodule
+		if(node_results[3] == 32'b0) one_hot_out[3] = 1'b0;
+		else begin
+			if(node_results[3] <= node_results[0]) one_hot_out[3] = 1'b0;
+			else if(node_results[3] <= node_results[1]) one_hot_out[3] = 1'b0;
+			else if(node_results[3] <= node_results[2]) one_hot_out[3] = 1'b0;
+			else if(node_results[3] <= node_results[4]) one_hot_out[3] = 1'b0;
+			else if(node_results[3] <= node_results[5]) one_hot_out[3] = 1'b0;
+			else if(node_results[3] <= node_results[6]) one_hot_out[3] = 1'b0;
+			else if(node_results[3] <= node_results[7]) one_hot_out[3] = 1'b0;
+			else if(node_results[3] <= node_results[8]) one_hot_out[3] = 1'b0;
+			else if(node_results[3] <= node_results[9]) one_hot_out[3] = 1'b0;
+			else one_hot_out[3] = 1'b1;
+		end
+
+		if(node_results[4] == 32'b0) one_hot_out[4] = 1'b0;
+		else begin
+			if(node_results[4] <= node_results[0]) one_hot_out[4] = 1'b0;
+			else if(node_results[4] <= node_results[1]) one_hot_out[4] = 1'b0;
+			else if(node_results[4] <= node_results[2]) one_hot_out[4] = 1'b0;
+			else if(node_results[4] <= node_results[3]) one_hot_out[4] = 1'b0;
+			else if(node_results[4] <= node_results[5]) one_hot_out[4] = 1'b0;
+			else if(node_results[4] <= node_results[6]) one_hot_out[4] = 1'b0;
+			else if(node_results[4] <= node_results[7]) one_hot_out[4] = 1'b0;
+			else if(node_results[4] <= node_results[8]) one_hot_out[4] = 1'b0;
+			else if(node_results[4] <= node_results[9]) one_hot_out[4] = 1'b0;
+			else one_hot_out[4] = 1'b1;
+		end
+
+		if(node_results[5] == 32'b0) one_hot_out[5] = 1'b0;
+		else begin
+			if(node_results[5] <= node_results[0]) one_hot_out[5] = 1'b0;
+			else if(node_results[5] <= node_results[1]) one_hot_out[5] = 1'b0;
+			else if(node_results[5] <= node_results[2]) one_hot_out[5] = 1'b0;
+			else if(node_results[5] <= node_results[3]) one_hot_out[5] = 1'b0;
+			else if(node_results[5] <= node_results[4]) one_hot_out[5] = 1'b0;
+			else if(node_results[5] <= node_results[6]) one_hot_out[5] = 1'b0;
+			else if(node_results[5] <= node_results[7]) one_hot_out[5] = 1'b0;
+			else if(node_results[5] <= node_results[8]) one_hot_out[5] = 1'b0;
+			else if(node_results[5] <= node_results[9]) one_hot_out[5] = 1'b0;
+			else one_hot_out[5] = 1'b1;
+		end
+
+		if(node_results[6] == 32'b0) one_hot_out[6] = 1'b0;
+		else begin
+			if(node_results[6] <= node_results[0]) one_hot_out[6] = 1'b0;
+			else if(node_results[6] <= node_results[1]) one_hot_out[6] = 1'b0;
+			else if(node_results[6] <= node_results[2]) one_hot_out[6] = 1'b0;
+			else if(node_results[6] <= node_results[3]) one_hot_out[6] = 1'b0;
+			else if(node_results[6] <= node_results[4]) one_hot_out[6] = 1'b0;
+			else if(node_results[6] <= node_results[5]) one_hot_out[6] = 1'b0;
+			else if(node_results[6] <= node_results[7]) one_hot_out[6] = 1'b0;
+			else if(node_results[6] <= node_results[8]) one_hot_out[6] = 1'b0;
+			else if(node_results[6] <= node_results[9]) one_hot_out[6] = 1'b0;
+			else one_hot_out[6] = 1'b1;
+		end
+
+		if(node_results[7] == 32'b0) one_hot_out[7] = 1'b0;
+		else begin
+			if(node_results[7] <= node_results[0]) one_hot_out[7] = 1'b0;
+			else if(node_results[7] <= node_results[1]) one_hot_out[7] = 1'b0;
+			else if(node_results[7] <= node_results[2]) one_hot_out[7] = 1'b0;
+			else if(node_results[7] <= node_results[3]) one_hot_out[7] = 1'b0;
+			else if(node_results[7] <= node_results[4]) one_hot_out[7] = 1'b0;
+			else if(node_results[7] <= node_results[5]) one_hot_out[7] = 1'b0;
+			else if(node_results[7] <= node_results[6]) one_hot_out[7] = 1'b0;
+			else if(node_results[7] <= node_results[8]) one_hot_out[7] = 1'b0;
+			else if(node_results[7] <= node_results[9]) one_hot_out[7] = 1'b0;
+			else one_hot_out[7] = 1'b1;
+		end
+
+		if(node_results[8] == 32'b0) one_hot_out[8] = 1'b0;
+		else begin
+			if(node_results[8] <= node_results[0]) one_hot_out[8] = 1'b0;
+			else if(node_results[8] <= node_results[1]) one_hot_out[8] = 1'b0;
+			else if(node_results[8] <= node_results[2]) one_hot_out[8] = 1'b0;
+			else if(node_results[8] <= node_results[3]) one_hot_out[8] = 1'b0;
+			else if(node_results[8] <= node_results[4]) one_hot_out[8] = 1'b0;
+			else if(node_results[8] <= node_results[5]) one_hot_out[8] = 1'b0;
+			else if(node_results[8] <= node_results[6]) one_hot_out[8] = 1'b0;
+			else if(node_results[8] <= node_results[7]) one_hot_out[8] = 1'b0;
+			else if(node_results[8] <= node_results[9]) one_hot_out[8] = 1'b0;
+			else one_hot_out[8] = 1'b1;
+		end
+
+		if(node_results[9] == 32'b0) one_hot_out[9] = 1'b0;
+		else begin
+			if(node_results[9] <= node_results[0]) one_hot_out[9] = 1'b0;
+			else if(node_results[9] <= node_results[1]) one_hot_out[9] = 1'b0;
+			else if(node_results[9] <= node_results[2]) one_hot_out[9] = 1'b0;
+			else if(node_results[9] <= node_results[3]) one_hot_out[9] = 1'b0;
+			else if(node_results[9] <= node_results[4]) one_hot_out[9] = 1'b0;
+			else if(node_results[9] <= node_results[5]) one_hot_out[9] = 1'b0;
+			else if(node_results[9] <= node_results[6]) one_hot_out[9] = 1'b0;
+			else if(node_results[9] <= node_results[7]) one_hot_out[9] = 1'b0;
+			else if(node_results[9] <= node_results[8]) one_hot_out[9] = 1'b0;
+			else one_hot_out[9] = 1'b1;
+		end
+
+	end
+endmodule //softmax
 
 module Network(
-	output logic [31:0] guess [10]
+	output logic guess [10]
 );
 
 	logic clk;
@@ -10968,7 +11155,7 @@ module Network(
 	control con_mod(.clk(clk), .layer0_en(layer0_en), .layer1_en(layer1_en));
 
 	logic [31:0] px_data [784];
-	pixel_rom_for_2 pixels(.data(px_data));
+	pixel_rom_for_9 pixels(.data(px_data));
 
 	logic [31:0] layer_data_0 [64];
 	layer_0 lay0(.input_data(px_data), .clk(clk), .enabled(layer0_en), .data(layer_data_0));
@@ -10976,7 +11163,5 @@ module Network(
 	logic [31:0] layer_data_1 [10];
 	layer_1 lay1(.input_data(layer_data_0), .clk(clk), .enabled(layer1_en), .data(layer_data_1));
 
-
-	assign guess = layer_data_1;
-
+	softmax one_hot(.node_results(layer_data_1), .clk(clk), .enabled(layer1_en), .one_hot_out(guess));
 endmodule // Network

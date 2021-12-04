@@ -55,7 +55,9 @@ for i in range(num_of_layers):
 
 control = BuildControl("control", layers, clk_speed)
 
-network = BuildNetwork(data_size, len(px_rom_arr), control, px_rom_arr[pic_to_use], layers)
+softmax = BuilSoftMax("softmax", data_size, node_count[-1])
+
+network = BuildNetwork(data_size, len(px_rom_arr), control, px_rom_arr[pic_to_use], layers, softmax)
 
 file_output = open("Network.sv", "w")
 write_to_file(ha.base, file_output)
@@ -82,8 +84,10 @@ for i in range(num_of_layers):
 
 write_to_file(control.base, file_output)
 
+write_to_file(softmax.base, file_output)
+
 write_to_file(network.base, file_output)
 
 output_network_testbench(num_pic_types)
-output_network_do(input_amount, clk_speed)
+output_network_do(input_amount, clk_speed, num_of_layers)
 # print(fa_1b.use_module([("a","bit0"), ("b", "bit1"), ("c_in", "bit2")], [("s", "bit_O_0"), ("c_out", "bit_O_1")]))
