@@ -322,9 +322,10 @@ class BuildLayer():
 		self.base.append(f"endmodule //{self.name}\n\n")
 		
 class BuildControl():
-	def __init__(self, name, layer_modules):
+	def __init__(self, name, layer_modules, clk_speed):
 		self.name = name
 		self.layer_mods = layer_modules
+		self.clk_speed = clk_speed
 		self.layer_enables = []
 		self.base = []
 		self.build_base()
@@ -354,7 +355,7 @@ class BuildControl():
 			else:
 				self.base.append(f"\t\t{self.layer_enables[i]} = 1'b0;\n")
 		self.base.append("\n\t\tforever begin\n")
-		self.base.append("\t\t\t#10 clk = ~clk;\n")
+		self.base.append(f"\t\t\t#{self.clk_speed} clk = ~clk;\n")
 		self.base.append("\t\tend\n")
 		self.base.append("\tend\n\n")
 
@@ -426,7 +427,7 @@ def output_network_testbench(output_count):
 	file.write(f"module tb;\n\tlogic [31:0] out [{output_count}];\n\tNetwork net(.guess(out));\nendmodule")
 
 #TODO Make waveforms pretty
-def output_network_do():
+def output_network_do(input_amt, clk_speed):
 	file = open("Network.do", "w")
 	
 	output = ["onbreak {resume}\n\n"]
@@ -440,12 +441,15 @@ def output_network_do():
 	output.append("view list\nview wave\n\n")
 
 	output.append("# Diplays All Signals recursively\nadd wave -b -r /tb/*\n\n")
+	sys_runtime = 0
+	for i in input_amt:
+		sys_runtime += clk_speed*i
 
 	output.append("-- Set Wave Output Items\n")
 	output.append("TreeUpdate [SetDefaultTree]\n")
-	output.append("WaveRestoreZoom {0 ps} {75 ns}\n")
+	output.append("WaveRestoreZoom {0 ps} {1500 ns}\n")
 	output.append("configure wave -namecolwidth 150\n")
-	output.append("configure wave -valuecolwidth 100\n")
+	output.append("configure wave -valuecolwidth 250\n")
 	output.append("configure wave -justifyvalue left\n")
 	output.append("configure wave -signalnamewidth 0\n")
 	output.append("configure wave -snapdistance 10\n")
@@ -453,6 +457,6 @@ def output_network_do():
 	output.append("configure wave -rowmargin 4\n")
 	output.append("configure wave -childrowmargin 2\n\n")
 
-	output.append(f"-- Run the Simulation\nrun {10*784*784 + 10*64*64 }ns\n")
+	output.append(f"-- Run the Simulation\nrun {sys_runtime}ns\n")
 
 	write_to_file(output, file)
