@@ -12,7 +12,7 @@ class BasicModuleBuilder():
 	def __init__(self, module_type, n_bits = 1, input_vals = [], output_vals = [], needed_submodules = []):
 		self.module_type = module_type
 		self.name = module_type + f"_{n_bits}b"
-		print(self.name)
+		print(f"Building module: {self.name}")
 		self.n = n_bits
 
 		self.input_vals = input_vals
@@ -57,38 +57,38 @@ class BasicModuleBuilder():
 		}
 		# Setup matching bits for inputs
 		for inputs in self.input_vals:
-			print(f"Inputs {self.name}: {matching_bits}")
+			# print(f"Inputs {self.name}: {matching_bits}")
 			name, bits = inputs
 			len_stored = len(matching_bits["inputs"])
 			if(not matching_bits["inputs"]):
-				print("Empty Dict")
+				# print("Empty Dict")
 				matching_bits["inputs"].update({bits:[name]})
 			else:
 				for index, bit_num in enumerate(matching_bits["inputs"]):
 					if(bit_num == bits):
-						print("Found Matching")
+						# print("Found Matching")
 						matching_bits["inputs"][bit_num].append(name)
 						break
 					elif(index == len_stored-1):
-						print("didn't find matching bit")
+						# print("didn't find matching bit")
 						matching_bits["inputs"].update({bits:[name]})
 						break
 		# Setup matching bits for outputs
 		for outputs in self.output_vals:
-			print(f"Outputs {self.name}: {matching_bits}")
+			# print(f"Outputs {self.name}: {matching_bits}")
 			name, bits = outputs
 			len_stored = len(matching_bits["outputs"])
 			if(not matching_bits["outputs"]):
-				print("Empty Dict")
+				# print("Empty Dict")
 				matching_bits["outputs"].update({bits:[name]})
 			else:
 				for index, bit_num in enumerate(matching_bits["outputs"]):
 					if(bit_num == bits):
-						print("Found Matching")
+						# print("Found Matching")
 						matching_bits["outputs"][bit_num].append(name)
 						break
 					elif(index == len_stored-1):
-						print("didn't find matching bit")
+						# print("didn't find matching bit")
 						matching_bits["outputs"].update({bits:[name]})
 						break
 
@@ -99,7 +99,7 @@ class BasicModuleBuilder():
 			else:
 				str_out = f"	input logic [{bit-1}:0]"
 			for in_names in matching_bits["inputs"][bit]:
-				print(in_names)
+				# print(in_names)
 				str_out += f" {in_names},"
 			str_out += "\n"
 
@@ -156,6 +156,7 @@ class BasicModuleBuilder():
 class RomModuleBuilder():
 	def __init__(self, name, data_size, mem_amount, dat_file_path):
 		self.name = name
+		print(f"Building module: {self.name}")
 		self.data_size = data_size
 		self.mem_amount = mem_amount
 		self.file_path = dat_file_path
@@ -173,6 +174,7 @@ class RomModuleBuilder():
 class ActivationFuncModuleBuilder():
 	def __init__(self, name, data_size):
 		self.name = name
+		print(f"Building module: {self.name}")
 		self.data_size = data_size
 		self.input_name = ""
 		self.output_name = ""
@@ -195,6 +197,7 @@ class ActivationFuncModuleBuilder():
 class BuildNode():
 	def __init__(self, name, amt_layers, current_layer, node_index, adder_module, mult_module, data_size, activation_function_module, input_amount):
 		self.name = name 
+		print(f"Building module: {self.name}")
 		self.amt_layers = amt_layers
 		self.current_layer = current_layer
 		self.node_index = node_index
@@ -290,6 +293,7 @@ class BuildNode():
 class BuildLayer():
 	def __init__(self, name, data_size, input_count, nodes, weight_modules, bias_module):
 		self.name = name
+		print(f"Building module: {self.name}")
 		self.data_size = data_size
 		self.input_count = input_count
 		self.node_count = len(nodes)
@@ -324,6 +328,7 @@ class BuildLayer():
 class BuildControl():
 	def __init__(self, name, layer_modules, clk_speed):
 		self.name = name
+		print(f"Building module: {self.name}")
 		self.layer_mods = layer_modules
 		self.clk_speed = clk_speed
 		self.layer_enables = []
@@ -378,6 +383,7 @@ class BuildControl():
 class BuilSoftMax():
 	def __init__(self, name, data_size, output_amt):
 		self.name = name 
+		print(f"Building module: {self.name}")
 		self.data_size = data_size 
 		self.output_amt = output_amt
 		self.base = []
@@ -419,6 +425,7 @@ class BuilSoftMax():
 #Network connects all layers, implements pic_ROM, and outputs the guess
 class BuildNetwork():
 	def __init__(self, data_size, output_amount, control_module, px_module, layer_modules, softmax_module):
+		print(f"Building module: Network")
 		self.data_size = data_size
 		self.output_amount = output_amount
 		self.control_mod = control_module
