@@ -273,7 +273,7 @@ class BuildNode():
 		self.base.append(f"\t\tend\n")
 		self.base.append(f"\tend\n\n")
 
-		if(self.current_layer == self.amt_layers - 1):
+		if(self.current_layer != self.amt_layers - 1):
 			act_in_name = self.activation_function_module.input_name
 			self.base.append(f"\treg [{self.data_size - 1}:0] act_{act_in_name};\n")
 			self.base.append(f"\t{self.activation_function_module.name} act_func(.{act_in_name}(act_{act_in_name}), .{self.activation_function_module.output_name}(node_res));\n")
@@ -375,7 +375,7 @@ class BuildControl():
 				prev_count += layer.input_count
 		self.base.append("\t\tclock_cycles = clock_cycles + 1;\n\n")
 		self.base.append(f"\tend\n")
-		self.base.append(f"endmodule {self.name}//\n\n")
+		self.base.append(f"endmodule // {self.name}\n\n")
 		
 #Network connects all layers, implements pic_ROM, and outputs the guess
 class BuildNetwork():
@@ -443,13 +443,13 @@ def output_network_do(input_amt, clk_speed):
 	output.append("# Diplays All Signals recursively\nadd wave -b -r /tb/*\n\n")
 	sys_runtime = 0
 	for i in input_amt:
-		sys_runtime += clk_speed*i
+		sys_runtime += 2*clk_speed*i
 
 	output.append("-- Set Wave Output Items\n")
 	output.append("TreeUpdate [SetDefaultTree]\n")
 	output.append("WaveRestoreZoom {0 ps} {1500 ns}\n")
-	output.append("configure wave -namecolwidth 150\n")
-	output.append("configure wave -valuecolwidth 250\n")
+	output.append("configure wave -namecolwidth 225\n")
+	output.append("configure wave -valuecolwidth 260\n")
 	output.append("configure wave -justifyvalue left\n")
 	output.append("configure wave -signalnamewidth 0\n")
 	output.append("configure wave -snapdistance 10\n")
@@ -457,6 +457,6 @@ def output_network_do(input_amt, clk_speed):
 	output.append("configure wave -rowmargin 4\n")
 	output.append("configure wave -childrowmargin 2\n\n")
 
-	output.append(f"-- Run the Simulation\nrun {sys_runtime}ns\n")
+	output.append(f"-- Run the Simulation\nrun {sys_runtime+clk_speed}ns\n")
 
 	write_to_file(output, file)

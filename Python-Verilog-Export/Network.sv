@@ -10355,12 +10355,7 @@ module layer1_node_0(
 		end
 	end
 
-	reg [31:0] act_r_in;
-	relu act_func(.r_in(act_r_in), .r_out(node_res));
-	always @(negedge enabled) begin
-		act_r_in = sum_res;
-	end
-
+	assign node_res = sum_res;
 endmodule //layer1_node_0
 
 module layer1_node_1(
@@ -10416,12 +10411,7 @@ module layer1_node_1(
 		end
 	end
 
-	reg [31:0] act_r_in;
-	relu act_func(.r_in(act_r_in), .r_out(node_res));
-	always @(negedge enabled) begin
-		act_r_in = sum_res;
-	end
-
+	assign node_res = sum_res;
 endmodule //layer1_node_1
 
 module layer1_node_2(
@@ -10477,12 +10467,7 @@ module layer1_node_2(
 		end
 	end
 
-	reg [31:0] act_r_in;
-	relu act_func(.r_in(act_r_in), .r_out(node_res));
-	always @(negedge enabled) begin
-		act_r_in = sum_res;
-	end
-
+	assign node_res = sum_res;
 endmodule //layer1_node_2
 
 module layer1_node_3(
@@ -10538,12 +10523,7 @@ module layer1_node_3(
 		end
 	end
 
-	reg [31:0] act_r_in;
-	relu act_func(.r_in(act_r_in), .r_out(node_res));
-	always @(negedge enabled) begin
-		act_r_in = sum_res;
-	end
-
+	assign node_res = sum_res;
 endmodule //layer1_node_3
 
 module layer1_node_4(
@@ -10599,12 +10579,7 @@ module layer1_node_4(
 		end
 	end
 
-	reg [31:0] act_r_in;
-	relu act_func(.r_in(act_r_in), .r_out(node_res));
-	always @(negedge enabled) begin
-		act_r_in = sum_res;
-	end
-
+	assign node_res = sum_res;
 endmodule //layer1_node_4
 
 module layer1_node_5(
@@ -10660,12 +10635,7 @@ module layer1_node_5(
 		end
 	end
 
-	reg [31:0] act_r_in;
-	relu act_func(.r_in(act_r_in), .r_out(node_res));
-	always @(negedge enabled) begin
-		act_r_in = sum_res;
-	end
-
+	assign node_res = sum_res;
 endmodule //layer1_node_5
 
 module layer1_node_6(
@@ -10721,12 +10691,7 @@ module layer1_node_6(
 		end
 	end
 
-	reg [31:0] act_r_in;
-	relu act_func(.r_in(act_r_in), .r_out(node_res));
-	always @(negedge enabled) begin
-		act_r_in = sum_res;
-	end
-
+	assign node_res = sum_res;
 endmodule //layer1_node_6
 
 module layer1_node_7(
@@ -10782,12 +10747,7 @@ module layer1_node_7(
 		end
 	end
 
-	reg [31:0] act_r_in;
-	relu act_func(.r_in(act_r_in), .r_out(node_res));
-	always @(negedge enabled) begin
-		act_r_in = sum_res;
-	end
-
+	assign node_res = sum_res;
 endmodule //layer1_node_7
 
 module layer1_node_8(
@@ -10843,12 +10803,7 @@ module layer1_node_8(
 		end
 	end
 
-	reg [31:0] act_r_in;
-	relu act_func(.r_in(act_r_in), .r_out(node_res));
-	always @(negedge enabled) begin
-		act_r_in = sum_res;
-	end
-
+	assign node_res = sum_res;
 endmodule //layer1_node_8
 
 module layer1_node_9(
@@ -10904,12 +10859,7 @@ module layer1_node_9(
 		end
 	end
 
-	reg [31:0] act_r_in;
-	relu act_func(.r_in(act_r_in), .r_out(node_res));
-	always @(negedge enabled) begin
-		act_r_in = sum_res;
-	end
-
+	assign node_res = sum_res;
 endmodule //layer1_node_9
 
 module layer_1(
@@ -10993,7 +10943,7 @@ module control(
 		clock_cycles = clock_cycles + 1;
 
 	end
-endmodule
+endmodule // control
 
 module Network(
 	output logic [31:0] guess [10]
