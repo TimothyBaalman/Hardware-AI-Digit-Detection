@@ -19,6 +19,12 @@ test_loader = torch.utils.data.DataLoader(dataset=test_set, batch_size=100, shuf
 output_pic = 0
 for images, target_labels in test_loader:
 	for index, img in enumerate(images):
+		# if(target_labels[index] == 2):
+		# 	img_array = torch.flatten(img).numpy()
+		# 	with open(f"{root}/image_of_2.dat", "w") as file:
+		# 		for pixel in img_array:
+		# 			file.write(f"{float_to_signed_fixed_point(pixel)}\n")
+		# 	break
 		if(output_pic == 10):
 			break
 		if(target_labels[index] == output_pic):

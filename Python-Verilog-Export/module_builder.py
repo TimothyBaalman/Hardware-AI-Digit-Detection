@@ -440,7 +440,7 @@ def output_network_do(input_amt, clk_speed):
 
 	output.append("view list\nview wave\n\n")
 
-	output.append("# Diplays All Signals recursively\nadd wave -b -r /tb/*\n\n")
+	output.append("# Diplays All Signals recursively\nadd wave -b -r /tb/out\n\n")
 	sys_runtime = 0
 	for i in input_amt:
 		sys_runtime += 2*clk_speed*i

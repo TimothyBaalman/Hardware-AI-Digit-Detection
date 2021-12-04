@@ -15,7 +15,7 @@ view list
 view wave
 
 # Diplays All Signals recursively
-add wave -b -r /tb/*
+add wave -b -r /tb/out
 
 -- Set Wave Output Items
 TreeUpdate [SetDefaultTree]

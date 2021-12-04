@@ -10945,6 +10945,18 @@ module control(
 	end
 endmodule // control
 
+// module softmax(
+// 	input logic [31:0] node_res [10],
+// 	output logic out [10]
+// );
+
+// 	logic [31:0] first_loop [10];
+// 	if(node_res[0] > node_res[1]) assign node_res[1] = 1'b0;
+	
+
+
+// endmodule
+
 module Network(
 	output logic [31:0] guess [10]
 );
@@ -10956,13 +10968,14 @@ module Network(
 	control con_mod(.clk(clk), .layer0_en(layer0_en), .layer1_en(layer1_en));
 
 	logic [31:0] px_data [784];
-	pixel_rom_for_0 pixels(.data(px_data));
+	pixel_rom_for_2 pixels(.data(px_data));
 
 	logic [31:0] layer_data_0 [64];
 	layer_0 lay0(.input_data(px_data), .clk(clk), .enabled(layer0_en), .data(layer_data_0));
 
 	logic [31:0] layer_data_1 [10];
 	layer_1 lay1(.input_data(layer_data_0), .clk(clk), .enabled(layer1_en), .data(layer_data_1));
+
 
 	assign guess = layer_data_1;
 
