@@ -11155,7 +11155,7 @@ module Network(
 	control con_mod(.clk(clk), .layer0_en(layer0_en), .layer1_en(layer1_en));
 
 	logic [31:0] px_data [784];
-	pixel_rom_for_9 pixels(.data(px_data));
+	pixel_rom_for_0 pixels(.data(px_data));
 
 	logic [31:0] layer_data_0 [64];
 	layer_0 lay0(.input_data(px_data), .clk(clk), .enabled(layer0_en), .data(layer_data_0));

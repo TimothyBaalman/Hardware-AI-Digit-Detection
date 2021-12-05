@@ -17,3 +17,10 @@ weights = [[50, 978, 2323, 23545], [32,32, 3563, 6734]]
 best_results["fc_weights"] = weights
 best_results["fc_weights"].append([0])
 print(best_results)
+
+# test_arr = []
+# test_arr.append([])
+
+# test_arr[0].append("test")
+
+# print(test_arr)
