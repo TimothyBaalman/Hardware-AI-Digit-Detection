@@ -1,0 +1,1 @@
+#Should say at or below 4 bits to keep speed for the basic
