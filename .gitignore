@@ -8,5 +8,5 @@ work/
 *transcript
 
 *vsim.wlf
-
+*tcl_stacktrace.txt
 *vsim_stacktrace.vstf
